@@ -1,0 +1,65 @@
+version: '3.1'
+services:
+  mongo:
+    image: bitnami/mongodb:4.2.17
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      MONGO_INITDB_ROOT_USERNAME: root
+    volumes:
+      - 'mongodb_data:/bitnami/mongodb'
+
+  rabbitmq:
+    image: 'bitnami/rabbitmq:3.9'
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 61613:61613
+      - 15674:15674
+    environment:
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 0.1
+      RABBITMQ_DISK_FREE_RELATIVE_LIMIT: 0.05
+      RABBITMQ_PLUGINS: 'rabbitmq_management,rabbitmq_stomp,rabbitmq_web_stomp'
+    volumes:
+      - 'rabbitmq_data:/bitnami'
+
+  redis:
+    image: 'bitnami/redis:6.0'
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - 6379:6379
+
+  # es01:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+  #   restart: always
+  #   environment:
+  #     - node.name=es01
+  #     - cluster.name=es-docker-cluster
+  #     - discovery.seed_hosts=
+  #     - cluster.initial_master_nodes=es01
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+  #     - http.cors.enabled=true
+  #     - http.cors.allow-origin=/.*/
+  #   ulimits:
+  #     nproc: 8192
+  #     nofile: 524288
+  #     memlock: -1
+  #   mem_limit: 3g
+  #   volumes:
+  #     - es_data:/usr/share/elasticsearch/data
+  #   ports:
+  #     - 9200:9200
+
+volumes:
+  mongodb_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  # es_data:
+  #   driver: local
