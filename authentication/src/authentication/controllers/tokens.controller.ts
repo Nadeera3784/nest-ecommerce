@@ -1,9 +1,26 @@
-import { Controller } from "@nestjs/common";
+import { Controller, HttpStatus, Logger } from "@nestjs/common";
 import { FastifyRequestWithIpInterface } from "../interfaces";
-import { FastifyResponse } from "../../common/interfaces";
+import { FastifyResponse, RequestFingerprint } from "../../common/interfaces";
+import { PasswordEncoder } from "src/user/tools";
+import { RolesEnum } from "../enum";
+import { JwtAuthGuard } from "../guards/jwt-auth.guard";
+import { RequestParser, TokenService } from "../services";
+import { UserDocument } from "src/user/interfaces";
+import { EventDispatcher } from "src/core/event-dispatcher";
+import { EncryptionService } from "src/user/services/encryption";
 
 @Controller('api')
 export class TokensController {
+
+  constructor(
+    private readonly logger: Logger,
+    private readonly eventDispatcher: EventDispatcher,
+    private readonly userService: UserService,
+    private readonly tokenService: TokenService,
+    private readonly secondFactorService: SecondFactorService,
+    private readonly suspiciousActivityService: SuspiciousActivityService,
+    private readonly encryptionService: EncryptionService,
+  ) { }
 
   @Post('/login')
   @Roles(RolesEnum.anonymous)
