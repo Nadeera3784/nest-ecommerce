@@ -26,3 +26,5 @@ export const PaymentSchema = new Schema<PaymentDocument>({
 
 PaymentSchema.index({ orderId: 1 });
 PaymentSchema.index({ userId: 1, createdAt: -1 });
+
+

@@ -13,3 +13,5 @@ export const CategorySchema = new Schema<CategoryDocument>({
   name: { type: String, required: true, trim: true, unique: true },
   description: { type: String, trim: true },
 }, { timestamps: true });
+
+

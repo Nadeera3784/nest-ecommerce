@@ -26,3 +26,5 @@ export const TransactionSchema = new Schema<TransactionDocument>({
 
 TransactionSchema.index({ paymentId: 1, createdAt: -1 });
 TransactionSchema.index({ userId: 1, createdAt: -1 });
+
+

@@ -19,3 +19,5 @@ export const ProductSchema = new Schema<ProductDocument>({
   stock: { type: Number, required: true, min: 0 },
   categoryId: { type: String, index: true },
 }, { timestamps: true });
+
+

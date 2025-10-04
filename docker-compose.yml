@@ -1,6 +1,6 @@
 version: '3.1'
 services:
-  mongo:
+  mongo_authentication:
     image: bitnami/mongodb:4.2.17
     restart: always
     ports:
@@ -9,7 +9,29 @@ services:
       ALLOW_EMPTY_PASSWORD: "yes"
       MONGO_INITDB_ROOT_USERNAME: root
     volumes:
-      - 'mongodb_data:/bitnami/mongodb'
+      - 'mongodb_authentication_data:/bitnami/mongodb'
+
+  mongo_inventory:
+    image: bitnami/mongodb:4.2.17
+    restart: always
+    ports:
+      - 27018:27017
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      MONGO_INITDB_ROOT_USERNAME: root
+    volumes:
+      - 'mongodb_inventory_data:/bitnami/mongodb'
+
+  mongo_payment:
+    image: bitnami/mongodb:4.2.17
+    restart: always
+    ports:
+      - 27019:27017
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+      MONGO_INITDB_ROOT_USERNAME: root
+    volumes:
+      - 'mongodb_payment_data:/bitnami/mongodb'
 
   rabbitmq:
     image: 'bitnami/rabbitmq:3.9'
@@ -34,6 +56,62 @@ services:
     ports:
       - 6379:6379
 
+  # application services (example ports; adjust as needed)
+  authentication:
+    build:
+      context: ./authentication
+    depends_on:
+      - mongo_authentication
+      - rabbitmq
+      - redis
+    environment:
+      - MONGODB_URL=mongodb://root@mongo_authentication:27017
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    ports:
+      - 3001:3000
+
+  inventory:
+    build:
+      context: ./inventory
+    depends_on:
+      - mongo_inventory
+      - rabbitmq
+      - redis
+    environment:
+      - MONGODB_URL=mongodb://root@mongo_inventory:27017
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    ports:
+      - 3002:3000
+
+  payment:
+    build:
+      context: ./payment
+    depends_on:
+      - mongo_payment
+      - rabbitmq
+      - redis
+    environment:
+      - MONGODB_URL=mongodb://root@mongo_payment:27017
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    ports:
+      - 3003:3000
+
+  gateway:
+    build:
+      context: ./gateway
+    depends_on:
+      - authentication
+      - inventory
+      - payment
+      - rabbitmq
+      - redis
+    environment:
+      - AUTH_SERVICE_URL=http://authentication:3000
+      - INVENTORY_SERVICE_URL=http://inventory:3000
+      - PAYMENT_SERVICE_URL=http://payment:3000
+    ports:
+      - 8080:3000
+
   # es01:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
   #   restart: always
@@ -57,7 +135,11 @@ services:
   #     - 9200:9200
 
 volumes:
-  mongodb_data:
+  mongodb_authentication_data:
+    driver: local
+  mongodb_inventory_data:
+    driver: local
+  mongodb_payment_data:
     driver: local
   rabbitmq_data:
     driver: local

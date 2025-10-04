@@ -93,4 +93,9 @@ export const environment: any = {
   },
   statusPort: env.STATUS_APP_PORT,
   trustedProxies: env.TRUSTED_PROXIES,
+  services: {
+    authenticationBaseUrl: env.AUTH_SERVICE_URL || 'http://authentication:3000',
+    inventoryBaseUrl: env.INVENTORY_SERVICE_URL || 'http://inventory:3000',
+    paymentBaseUrl: env.PAYMENT_SERVICE_URL || 'http://payment:3000',
+  },
 };
