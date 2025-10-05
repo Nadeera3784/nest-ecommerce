@@ -6,6 +6,7 @@ import { CommandModule } from './core/command';
 import { RabbitMqModule } from './core/rabbit-mq';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
+import { TokensGenerationService } from './authentication/services/tokens-generation.service';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { JwtModule } from '@nestjs/jwt';
     RabbitMqModule.forRoot(environment.rabbitmq),
   ],
   controllers: [],
-  providers: [],
+  providers: [TokensGenerationService],
 })
 
 export class ApplicationModule implements NestModule {

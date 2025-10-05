@@ -1,16 +1,16 @@
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Hash } from '../helpers/hash';
+import { TokensGenerationService } from './tokens-generation.service';
 import {
   AccessTokenResultModel,
   GuestTokenParamsModel,
   GuestUserTokenInterface,
-  Hash,
-  RolesEnum,
-  TokensGenerationService,
   TokensResultModel,
   UserTokenInterface,
-} from '@pe/nest-kit';
-import { TokenType } from '@pe/nest-kit/modules/auth/enums/token-type.enum';
+} from '../interfaces/tokens';
+import { TokenType } from '../enum/token-type.enum';
+import { RolesEnum } from '../enum/roles.enum';
 import { Model, Query } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 import { RabbitMessagesEnum, RmqSender } from '../../common';

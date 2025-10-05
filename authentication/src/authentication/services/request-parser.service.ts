@@ -1,4 +1,4 @@
-import { Hash } from '@pe/nest-kit';
+import { Hash } from '../helpers/hash';
 import * as ipv from 'ip-address';
 import * as userAgentParser from 'useragent';
 

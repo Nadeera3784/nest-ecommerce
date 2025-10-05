@@ -1,4 +1,4 @@
 export enum TokenType {
-  auth,
-  oauth,
+  common = 'common',
+  secondFactorAuth = 'secondFactorAuth',
 }
