@@ -29,7 +29,7 @@ make kong-config
 make kong-test
 ```
 
-**That's it!** Your e-commerce platform is now running at **http://localhost:8000** 🎉
+**That's it!** Your e-commerce platform is now running at **http://localhost:8000** 
 
 ## Services
 
@@ -252,11 +252,6 @@ nest-ecommerce/
 ├── Makefile               # Management commands
 ```
 
----
-
-**Built with ❤️ using NestJS and Kong Gateway**
-
-Ready to scale! 🚀
 
 
 
