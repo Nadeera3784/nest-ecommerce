@@ -1,9 +1,10 @@
-import { DynamicModule, Global, Module, HttpModule, Provider } from '@nestjs/common';
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { DiscoveryModule } from '../discovery';
 import { BindingsCollector } from './bindings-collector';
 import { RabbitSetupCommand, RabbitRefreshCommand } from './commands';
 import { RabbitMqConnection } from './rabbit-mq.connection';
-import { ConsumersProvidersFactory } from './helper';
+import { consumersProvidersFactory } from './helper';
 import { RestClient, ManagementService } from './management';
 import { MessageBusService } from './message';
 import { RabbitMqRPCClient } from './rabbit-mq-rpc.client';
@@ -45,7 +46,7 @@ export class RabbitMqModule {
       },
     ];
 
-    const queueProviders = ConsumersProvidersFactory.create(rabbitMqConfig);
+    const queueProviders = consumersProvidersFactory((rabbitMqConfig as any).consumers || []);
     for (const provider of queueProviders) {
       providers.push(provider);
     }

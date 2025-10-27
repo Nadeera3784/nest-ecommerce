@@ -202,4 +202,18 @@ export class Consumer extends Server implements CustomTransportStrategy {
     });
     callback();
   }
+
+  // Required by Server interface
+  on<EventKey extends string = string, EventCallback extends Function = Function>(
+    event: EventKey,
+    callback: EventCallback
+  ): any {
+    // Implementation can be added if needed
+    return this;
+  }
+
+  // Required by Server interface  
+  unwrap(): any {
+    return this.connection;
+  }
 }

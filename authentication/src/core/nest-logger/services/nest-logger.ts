@@ -4,12 +4,15 @@ import { NestLoggerOptions } from '../interfaces';
 
 @Injectable()
 export class NestLogger extends Logger {
-    constructor(private readonly options: NestLoggerOptions) {
+    private readonly nestOptions: NestLoggerOptions;
+
+    constructor(options: NestLoggerOptions) {
         super();
+        this.nestOptions = options;
     }
 
     log(message: any, context?: string): void {
-        if (this.options.isProduction) {
+        if (this.nestOptions.isProduction) {
             // eslint-disable-next-line no-console
             console.log(JSON.stringify(message), JSON.stringify(context || message.context));
         } else {
@@ -18,7 +21,7 @@ export class NestLogger extends Logger {
     }
 
     error(message: any, trace?: string, context?: string): void {
-        if (this.options.isProduction) {
+        if (this.nestOptions.isProduction) {
             if (typeof message !== 'object') {
                 message = { message };
             }
@@ -31,7 +34,7 @@ export class NestLogger extends Logger {
     }
 
     warn(message: any, context?: string): void {
-        if (this.options.isProduction) {
+        if (this.nestOptions.isProduction) {
             if (typeof message !== 'object') {
                 message = { message };
             }
@@ -64,7 +67,7 @@ export class NestLogger extends Logger {
         console.log(
             JSON.stringify(
                 {
-                    applicationId: this.options.applicationName,
+                    applicationId: this.nestOptions.applicationName,
                     severity,
                     timestamp: new Date(),
                     ...message,

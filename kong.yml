@@ -1,0 +1,186 @@
+# Configuration for NestJS E-commerce
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: authentication-service
+    url: http://authentication:3000
+    protocol: http
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    routes:
+      - name: auth-routes
+        paths:
+          - /api/auth
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+          policy: local
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+          exposed_headers:
+            - X-Auth-Token
+          credentials: true
+          max_age: 3600
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - X-Service-Name:authentication
+
+  - name: inventory-service
+    url: http://inventory:3000
+    protocol: http
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    routes:
+      - name: inventory-routes
+        paths:
+          - /api/inventory
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 200
+          hour: 2000
+          policy: local
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+          credentials: true
+          max_age: 3600
+      - name: proxy-cache
+        config:
+          strategy: memory
+          content_type:
+            - application/json
+          cache_ttl: 300
+          cache_control: false
+          request_method:
+            - GET
+            - HEAD
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - X-Service-Name:inventory
+
+  - name: payment-service
+    url: http://payment:3000
+    protocol: http
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    routes:
+      - name: payment-routes
+        paths:
+          - /api/payment
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 50
+          hour: 500
+          policy: local
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+          credentials: true
+          max_age: 3600
+      - name: request-size-limiting
+        config:
+          allowed_payload_size: 10
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - X-Service-Name:payment
+
+plugins:
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      generator: uuid
+      echo_downstream: true
+  
+  - name: prometheus
+    config:
+      per_consumer: false
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+      upstream_health_metrics: true
+
+  - name: request-termination
+    enabled: false
+    config:
+      status_code: 503
+      message: "Service temporarily unavailable"
+
+consumers:
+  - username: api-client
+    custom_id: api-client-001
+
+
+
+

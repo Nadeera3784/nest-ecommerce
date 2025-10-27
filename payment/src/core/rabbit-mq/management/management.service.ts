@@ -22,6 +22,10 @@ export class ManagementService {
     await this.clearQueueFromBindingsOutOfActual(actualBindings);
   }
 
+  async setupQueues(consumerDependent?: boolean): Promise<void> {
+    return this.setup(consumerDependent || false);
+  }
+
   private async setupActualBindings(
     bindings: Binding[],
     consumerDependent: boolean,

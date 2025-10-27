@@ -142,7 +142,7 @@ export class TokenService {
           email: userModel.email,
           firstName: userModel.firstName,
           lastName: userModel.lastName,
-          tokenId: refreshToken._id,
+          tokenId: refreshToken._id as string,
           tokenType: userModel.tokenType,
           userId: userModel.id,
         },
@@ -158,14 +158,14 @@ export class TokenService {
     user: RefreshPayload,
     parsedRequest: RequestFingerprint,
   ): Promise<AccessTokenResultModel> {
-    if (!user.payload.tokenId || user.payload.tokenType === TokenType.secondFactorAuth) {
+    if (!user.payload.token_id || user.payload.token_type === TokenType.secondFactorAuth) {
       throw new UnauthorizedException('forms.error.validator.token.invalid');
     }
 
-    const tokenEntity: RefreshTokenInterface = await this.refreshTokenModel.findById(user.payload.tokenId).exec();
+    const tokenEntity: RefreshTokenInterface = await this.refreshTokenModel.findById(user.payload.token_id).exec();
 
-    if (!tokenEntity.isValid(parsedRequest.userAgent)) {
-      await tokenEntity.invalidateRelated();
+    if (!(tokenEntity as any).isValid?.(parsedRequest.userAgent)) {
+      await (tokenEntity as any).invalidate_related?.();
       throw new ForbiddenException(
         `Caution! Invalid refresh token received! Will invalidate all other refresh tokens.`,
       );
@@ -177,8 +177,8 @@ export class TokenService {
       throw new ForbiddenException('User not found');
     }
 
-    if (!!tokenEntity.businessId) {
-      userEntity = await this.userService.findAndPopulateWithBusiness(userEntity._id, tokenEntity.businessId);
+    if (!!(tokenEntity as any).businessId) {
+      userEntity = await this.userService.findAndPopulateWithBusiness(userEntity._id, (tokenEntity as any).businessId);
     }
 
     const verifiedLocation: boolean = await this.locationService.isLocationVerified(userEntity, parsedRequest);
@@ -191,7 +191,7 @@ export class TokenService {
       accessToken: {
         expiresIn: environment.jwtOptions.signOptions.expiresIn,
         userModel: {
-          ...UserTokenModel.fromUser(userEntity, tokenEntity.businessId),
+          ...UserTokenModel.fromUser(userEntity, (tokenEntity as any).businessId),
           hash: parsedRequest.userAgentHash,
           removePreviousTokens: !userEntity.generalAccount,
         },
@@ -234,7 +234,7 @@ export class TokenService {
     return this.refreshTokenModel.create({
       businessId,
       ip: parsedRequest.ipAddress,
-      tokenType: isOauth ? OauthTokenType.oauth : OauthTokenType.auth,
+      tokenType: isOauth ? TokenType.oauth : TokenType.auth,
       user: userId,
       userAgent: parsedRequest.userAgent,
     });

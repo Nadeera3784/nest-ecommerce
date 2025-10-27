@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import { utc } from 'moment';
 
 import { ExpiredPasswordException, MalformedPasswordException } from '../exceptions';
-import { environment } from '../../environments';
+import { environment } from '../../../../environments';
 
 @Injectable()
 export class EncryptionService {

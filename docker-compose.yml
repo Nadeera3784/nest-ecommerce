@@ -1,62 +1,168 @@
-version: '3.1'
+version: '3.8'
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
 services:
+
+  kong-database:
+    image: postgres:13
+    container_name: kong-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kongpass
+    volumes:
+      - kong_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
+
+  kong-migration:
+    image: kong/kong-gateway:3.5
+    container_name: kong-migration
+    command: kong migrations bootstrap
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_DATABASE: kong
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    restart: on-failure
+
+  kong:
+    image: kong/kong-gateway:3.5
+    container_name: kong-gateway
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_DATABASE: kong
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+    ports:
+      - "8000:8000"   # Kong Proxy (HTTP)
+      - "8443:8443"   # Kong Proxy (HTTPS)
+      - "8001:8001"   # Kong Admin API
+      - "8002:8002"   # Kong Manager (GUI)
+    depends_on:
+      kong-database:
+        condition: service_healthy
+      kong-migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - ecommerce-network
+
+  konga:
+    image: pantsel/konga:latest
+    container_name: konga
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DB_ADAPTER: postgres
+      DB_HOST: kong-database
+      DB_PORT: 5432
+      DB_DATABASE: konga
+      DB_USER: kong
+      DB_PASSWORD: kongpass
+    ports:
+      - "1337:1337"
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+
   mongo_authentication:
-    image: bitnami/mongodb:4.2.17
+    image: mongo:7.0
     restart: always
     ports:
       - 27017:27017
     environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
       MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
-      - 'mongodb_authentication_data:/bitnami/mongodb'
+      - 'mongodb_authentication_data:/data/db'
+    networks:
+      - ecommerce-network
 
   mongo_inventory:
-    image: bitnami/mongodb:4.2.17
+    image: mongo:7.0
     restart: always
     ports:
       - 27018:27017
     environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
       MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
-      - 'mongodb_inventory_data:/bitnami/mongodb'
+      - 'mongodb_inventory_data:/data/db'
+    networks:
+      - ecommerce-network
 
   mongo_payment:
-    image: bitnami/mongodb:4.2.17
+    image: mongo:7.0
     restart: always
     ports:
       - 27019:27017
     environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
       MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
-      - 'mongodb_payment_data:/bitnami/mongodb'
+      - 'mongodb_payment_data:/data/db'
+    networks:
+      - ecommerce-network
 
   rabbitmq:
-    image: 'bitnami/rabbitmq:3.9'
+    image: rabbitmq:3.13-management
     restart: always
     ports:
       - 5672:5672
       - 15672:15672
-      - 61613:61613
-      - 15674:15674
     environment:
-      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 0.1
-      RABBITMQ_DISK_FREE_RELATIVE_LIMIT: 0.05
-      RABBITMQ_PLUGINS: 'rabbitmq_management,rabbitmq_stomp,rabbitmq_web_stomp'
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     volumes:
-      - 'rabbitmq_data:/bitnami'
+      - 'rabbitmq_data:/var/lib/rabbitmq'
+    networks:
+      - ecommerce-network
 
   redis:
-    image: 'bitnami/redis:6.0'
+    image: redis:7.2-alpine
     restart: always
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
+    command: redis-server --requirepass ""
     ports:
       - 6379:6379
+    volumes:
+      - 'redis_data:/data'
+    networks:
+      - ecommerce-network
 
-  # application services (example ports; adjust as needed)
+  # ============================================
+  # MICROSERVICES
+  # ============================================
   authentication:
     build:
       context: ./authentication
@@ -65,8 +171,11 @@ services:
       - rabbitmq
       - redis
     environment:
-      - MONGODB_URL=mongodb://root@mongo_authentication:27017
-      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_URL=mongodb://root:rootpassword@mongo_authentication:27017/authdb?authSource=admin
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - ecommerce-network
     ports:
       - 3001:3000
 
@@ -78,8 +187,11 @@ services:
       - rabbitmq
       - redis
     environment:
-      - MONGODB_URL=mongodb://root@mongo_inventory:27017
-      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_URL=mongodb://root:rootpassword@mongo_inventory:27017/inventorydb?authSource=admin
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - ecommerce-network
     ports:
       - 3002:3000
 
@@ -91,26 +203,14 @@ services:
       - rabbitmq
       - redis
     environment:
-      - MONGODB_URL=mongodb://root@mongo_payment:27017
-      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_URL=mongodb://root:rootpassword@mongo_payment:27017/paymentdb?authSource=admin
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - ecommerce-network
     ports:
       - 3003:3000
 
-  gateway:
-    build:
-      context: ./gateway
-    depends_on:
-      - authentication
-      - inventory
-      - payment
-      - rabbitmq
-      - redis
-    environment:
-      - AUTH_SERVICE_URL=http://authentication:3000
-      - INVENTORY_SERVICE_URL=http://inventory:3000
-      - PAYMENT_SERVICE_URL=http://payment:3000
-    ports:
-      - 8080:3000
 
   # es01:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
@@ -135,6 +235,8 @@ services:
   #     - 9200:9200
 
 volumes:
+  kong_data:
+    driver: local
   mongodb_authentication_data:
     driver: local
   mongodb_inventory_data:
@@ -142,6 +244,8 @@ volumes:
   mongodb_payment_data:
     driver: local
   rabbitmq_data:
+    driver: local
+  redis_data:
     driver: local
   # es_data:
   #   driver: local

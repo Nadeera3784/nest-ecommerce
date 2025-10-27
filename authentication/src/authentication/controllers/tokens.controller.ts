@@ -1,11 +1,15 @@
-import { Controller, HttpStatus, Logger } from "@nestjs/common";
-import { FastifyRequestWithIpInterface } from "../interfaces";
+import { Controller, HttpStatus, Logger, Post, HttpCode, UseGuards, Req, Res, Body } from "@nestjs/common";
+import { FastifyRequestWithIpInterface, LoginRequestDto, LoginEvent, LOGIN_EVENT } from "../interfaces";
 import { FastifyResponse, RequestFingerprint } from "../../common/interfaces";
 import { PasswordEncoder } from "src/user/tools";
 import { RolesEnum } from "../enum";
+import { Roles } from "../../user/decorators/roles.decorator";
 import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 import { RequestParser, TokenService } from "../services";
 import { UserDocument } from "src/user/interfaces";
+import { UserService } from "src/user/services/user.service";
+import { SecondFactorService } from "src/user/services/second-factor.service";
+import { SuspiciousActivityService } from "src/user/services/suspicious-activity.service";
 import { EventDispatcher } from "src/core/event-dispatcher";
 import { EncryptionService } from "src/user/services/encryption";
 

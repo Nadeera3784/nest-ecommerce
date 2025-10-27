@@ -5,7 +5,7 @@ import {
     ValidatorConstraint,
     ValidatorConstraintInterface,
   } from 'class-validator';
-import passwordSchema from '../../users/tools/password.schema';
+import passwordSchema from '../../user/tools/password.schema';
   
 @ValidatorConstraint({ async: false })
 class PasswordIsStrong implements ValidatorConstraintInterface {

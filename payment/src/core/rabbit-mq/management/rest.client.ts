@@ -1,4 +1,5 @@
-import { Injectable, HttpService, HttpException } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import type { AxiosResponse } from 'axios';
 import { RabbitMqConfig } from '../rabbit-mq.config';
@@ -16,7 +17,7 @@ export class RestClient {
     private readonly config: RabbitMqConfig,
     private readonly httpService: HttpService
   ) {
-    this.baseUrl = this.config.baseUrl?.replace(/\/$/, '') ?? '';
+    this.baseUrl = (this.config as any).baseUrl?.replace(/\/$/, '') ?? '';
     if (!this.baseUrl) {
       throw new Error('RabbitMqConfig.baseUrl is required');
     }
