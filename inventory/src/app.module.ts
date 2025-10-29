@@ -1,35 +1,29 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { environment } from './environments';
-import { NesLoggerModule } from './core/nest-logger';
-import { ApmModule } from './core/apm/apm.module';
-import { CommandModule } from './core/command';
-import { RabbitMqModule } from './core/rabbit-mq';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { JwtModule } from '@nestjs/jwt';
+import { HealthController } from './health.controller';
+import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
-import { OrderEventsController } from './integration/order-events.controller';
+import { environment } from './environments/environment';
 
 @Module({
   imports: [
-    NesLoggerModule.forRoot({
-      applicationName: environment.applicationName,
-      isProduction: environment.production,
+    MongooseModule.forRoot(environment.mongodb, {
+      connectionFactory: (connection) => {
+        connection.on('connected', () => {
+          console.log('MongoDB connected successfully');
+        });
+        connection.on('error', (error) => {
+          console.error('MongoDB connection error:', error);
+        });
+        return connection;
+      },
     }),
-    JwtModule.register(environment.jwtOptions),
-    MongooseModule.forRoot(
-      environment.mongodb,
-    ),
-    ApmModule.forRoot(environment.apm.enable, environment.apm.options),
-    CommandModule,
-    RabbitMqModule.forRoot(environment.rabbitmq),
+    AuthModule,
     ProductsModule,
     CategoriesModule,
   ],
-  controllers: [OrderEventsController],
+  controllers: [HealthController],
   providers: [],
 })
-
-export class ApplicationModule implements NestModule {
-  public configure(): MiddlewareConsumer | void { }
-}
+export class ApplicationModule {}

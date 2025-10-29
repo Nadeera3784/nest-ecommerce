@@ -6,7 +6,15 @@ export class PasswordEncoder {
   private static passwordLength: number = 40;
 
   public static encodePassword(password: string, salt: string): string {
-    return pbkdf2.pbkdf2Sync(String(password), salt, this.iterations, this.passwordLength, 'sha512').toString('base64');
+    return pbkdf2
+      .pbkdf2Sync(
+        String(password),
+        salt,
+        this.iterations,
+        this.passwordLength,
+        'sha512',
+      )
+      .toString('base64');
   }
 
   public static salt(): string {
@@ -16,7 +24,13 @@ export class PasswordEncoder {
       .replace(/[.+=]+/g, '');
   }
 
-  public static isPasswordValid(password: string, salt: string, hash: string): boolean {
-    return hash && salt && password && hash === this.encodePassword(password, salt);
+  public static isPasswordValid(
+    password: string,
+    salt: string,
+    hash: string,
+  ): boolean {
+    return (
+      hash && salt && password && hash === this.encodePassword(password, salt)
+    );
   }
 }

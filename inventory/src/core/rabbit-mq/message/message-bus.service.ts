@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { MessageInterface, EncryptedMessageInterface } from './message.interface';
+import {
+  MessageInterface,
+  EncryptedMessageInterface,
+} from './message.interface';
 import * as crypto from 'crypto';
 import { RabbitMqConfig } from '../rabbit-mq.config';
 
@@ -31,10 +34,14 @@ export class MessageBusService {
     return JSON.stringify(encryptedMessage);
   }
 
-  async unwrapMessage(payload: string | EncryptedMessageInterface): Promise<MessageInterface> {
+  async unwrapMessage(
+    payload: string | EncryptedMessageInterface,
+  ): Promise<MessageInterface> {
     const encryption = this.config.getMessageEncryption();
     if (!encryption) {
-      return typeof payload === 'string' ? JSON.parse(payload) : (payload as any);
+      return typeof payload === 'string'
+        ? JSON.parse(payload)
+        : (payload as any);
     }
 
     const { iv, content } =

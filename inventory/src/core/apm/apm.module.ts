@@ -28,10 +28,7 @@ export class ApmModule {
       },
     ];
 
-    const exportsArr = [
-      ApmService,
-      ApmConfigService,
-    ];
+    const exportsArr = [ApmService, ApmConfigService];
 
     return {
       module: ApmModule,

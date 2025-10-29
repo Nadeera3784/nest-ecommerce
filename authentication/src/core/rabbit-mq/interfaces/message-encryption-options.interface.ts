@@ -1,5 +1,5 @@
 export class MessageEncryptionOptionsInterface {
-    rsa?: {
-        private: string;
-    };
+  rsa?: {
+    private: string;
+  };
 }

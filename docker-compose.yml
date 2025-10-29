@@ -11,9 +11,9 @@ services:
     container_name: kong-database
     restart: unless-stopped
     environment:
-      POSTGRES_DB: kong
-      POSTGRES_USER: kong
-      POSTGRES_PASSWORD: kongpass
+      POSTGRES_DB: ${KONG_PG_DATABASE}
+      POSTGRES_USER: ${KONG_PG_USER}
+      POSTGRES_PASSWORD: ${KONG_PG_PASSWORD}
     volumes:
       - kong_data:/var/lib/postgresql/data
     healthcheck:
@@ -30,10 +30,10 @@ services:
     command: kong migrations bootstrap
     environment:
       KONG_DATABASE: postgres
-      KONG_PG_HOST: kong-database
-      KONG_PG_DATABASE: kong
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kongpass
+      KONG_PG_HOST: ${KONG_PG_HOST}
+      KONG_PG_DATABASE: ${KONG_PG_DATABASE}
+      KONG_PG_USER: ${KONG_PG_USER}
+      KONG_PG_PASSWORD: ${KONG_PG_PASSWORD}
     depends_on:
       kong-database:
         condition: service_healthy
@@ -47,22 +47,22 @@ services:
     restart: unless-stopped
     environment:
       KONG_DATABASE: postgres
-      KONG_PG_HOST: kong-database
-      KONG_PG_DATABASE: kong
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kongpass
+      KONG_PG_HOST: ${KONG_PG_HOST}
+      KONG_PG_DATABASE: ${KONG_PG_DATABASE}
+      KONG_PG_USER: ${KONG_PG_USER}
+      KONG_PG_PASSWORD: ${KONG_PG_PASSWORD}
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: 0.0.0.0:8001
-      KONG_ADMIN_GUI_URL: http://localhost:8002
-      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+      KONG_ADMIN_LISTEN: 0.0.0.0:${KONG_ADMIN_PORT}
+      KONG_ADMIN_GUI_URL: http://localhost:${KONG_MANAGER_PORT}
+      KONG_PROXY_LISTEN: 0.0.0.0:${KONG_PROXY_PORT}, 0.0.0.0:8443 ssl
     ports:
-      - "8000:8000"   # Kong Proxy (HTTP)
+      - "${KONG_PROXY_PORT}:${KONG_PROXY_PORT}"   # Kong Proxy (HTTP)
       - "8443:8443"   # Kong Proxy (HTTPS)
-      - "8001:8001"   # Kong Admin API
-      - "8002:8002"   # Kong Manager (GUI)
+      - "${KONG_ADMIN_PORT}:${KONG_ADMIN_PORT}"   # Kong Admin API
+      - "${KONG_MANAGER_PORT}:${KONG_MANAGER_PORT}"   # Kong Manager (GUI)
     depends_on:
       kong-database:
         condition: service_healthy
@@ -83,13 +83,13 @@ services:
     environment:
       NODE_ENV: production
       DB_ADAPTER: postgres
-      DB_HOST: kong-database
-      DB_PORT: 5432
+      DB_HOST: ${KONG_PG_HOST}
+      DB_PORT: ${KONG_PG_PORT}
       DB_DATABASE: konga
-      DB_USER: kong
-      DB_PASSWORD: kongpass
+      DB_USER: ${KONG_PG_USER}
+      DB_PASSWORD: ${KONG_PG_PASSWORD}
     ports:
-      - "1337:1337"
+      - "${KONGA_PORT}:1337"
     depends_on:
       kong-database:
         condition: service_healthy
@@ -98,118 +98,190 @@ services:
 
   mongo_authentication:
     image: mongo:7.0
+    container_name: mongo-authentication
     restart: always
     ports:
       - 27017:27017
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     volumes:
       - 'mongodb_authentication_data:/data/db'
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ecommerce-network
 
   mongo_inventory:
     image: mongo:7.0
+    container_name: mongo-inventory
     restart: always
     ports:
       - 27018:27017
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     volumes:
       - 'mongodb_inventory_data:/data/db'
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ecommerce-network
 
   mongo_payment:
     image: mongo:7.0
+    container_name: mongo-payment
     restart: always
     ports:
       - 27019:27017
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     volumes:
       - 'mongodb_payment_data:/data/db'
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ecommerce-network
 
   rabbitmq:
     image: rabbitmq:3.13-management
+    container_name: rabbitmq
     restart: always
     ports:
       - 5672:5672
       - 15672:15672
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     volumes:
       - 'rabbitmq_data:/var/lib/rabbitmq'
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ecommerce-network
 
   redis:
     image: redis:7.2-alpine
+    container_name: redis
     restart: always
     command: redis-server --requirepass ""
     ports:
       - 6379:6379
     volumes:
       - 'redis_data:/data'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ecommerce-network
 
-  # ============================================
-  # MICROSERVICES
-  # ============================================
   authentication:
     build:
       context: ./authentication
+    container_name: authentication-service
+    restart: unless-stopped
     depends_on:
-      - mongo_authentication
-      - rabbitmq
-      - redis
+      mongo_authentication:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      - MONGODB_URL=mongodb://root:rootpassword@mongo_authentication:27017/authdb?authSource=admin
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_URL=${MONGODB_AUTH_URL}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET_TOKEN=${JWT_SECRET_TOKEN}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - JWT_REFRESH_TOKEN_EXPIRES_IN=${JWT_REFRESH_TOKEN_EXPIRES_IN}
+      - APP_PORT=${APP_PORT}
+      - APP_NAME=${APP_NAME}
+      - PRODUCTION_MODE=${PRODUCTION_MODE}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - ecommerce-network
     ports:
-      - 3001:3000
+      - "${AUTHENTICATION_PORT}:3000"
 
   inventory:
     build:
       context: ./inventory
+    container_name: inventory-service
+    restart: unless-stopped
     depends_on:
-      - mongo_inventory
-      - rabbitmq
-      - redis
+      mongo_inventory:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      - MONGODB_URL=mongodb://root:rootpassword@mongo_inventory:27017/inventorydb?authSource=admin
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_URL=${MONGODB_INVENTORY_URL}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - REDIS_URL=${REDIS_URL}
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - ecommerce-network
     ports:
-      - 3002:3000
+      - "${INVENTORY_PORT}:3000"
 
   payment:
     build:
       context: ./payment
+    container_name: payment-service
+    restart: unless-stopped
     depends_on:
-      - mongo_payment
-      - rabbitmq
-      - redis
+      mongo_payment:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      - MONGODB_URL=mongodb://root:rootpassword@mongo_payment:27017/paymentdb?authSource=admin
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_URL=${MONGODB_PAYMENT_URL}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - REDIS_URL=${REDIS_URL}
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - ecommerce-network
     ports:
-      - 3003:3000
+      - "${PAYMENT_PORT}:3000"
 
 
   # es01:

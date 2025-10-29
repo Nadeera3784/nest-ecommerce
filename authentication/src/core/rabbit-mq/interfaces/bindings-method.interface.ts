@@ -1,4 +1,4 @@
 export interface BindingsMethodInterface {
-    name: string;
-    channel?: string;
+  name: string;
+  channel?: string;
 }

@@ -1,3 +1,3 @@
 export interface CookiesObject {
-    [key: string]: string;
+  [key: string]: string;
 }

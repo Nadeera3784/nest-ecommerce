@@ -70,6 +70,27 @@ services:
           - DELETE
           - PATCH
     plugins:
+      - name: jwt
+        config:
+          uri_param_names: []
+          cookie_names: []
+          claims_to_verify:
+            - exp
+          key_claim_name: iss
+          secret_is_base64: false
+          anonymous: null
+          run_on_preflight: true
+          maximum_expiration: 0
+          header_names:
+            - authorization
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - X-User-Id:$(jwt_claims.userId)
+              - X-User-Email:$(jwt_claims.email)
+              - X-Token-Id:$(jwt_claims.tokenId)
+              - X-Service-Name:inventory
       - name: rate-limiting
         config:
           minute: 200
@@ -101,11 +122,6 @@ services:
           request_method:
             - GET
             - HEAD
-      - name: request-transformer
-        config:
-          add:
-            headers:
-              - X-Service-Name:inventory
 
   - name: payment-service
     url: http://payment:3000
@@ -126,6 +142,27 @@ services:
           - DELETE
           - PATCH
     plugins:
+      - name: jwt
+        config:
+          uri_param_names: []
+          cookie_names: []
+          claims_to_verify:
+            - exp
+          key_claim_name: iss
+          secret_is_base64: false
+          anonymous: null
+          run_on_preflight: true
+          maximum_expiration: 0
+          header_names:
+            - authorization
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - X-User-Id:$(jwt_claims.userId)
+              - X-User-Email:$(jwt_claims.email)
+              - X-Token-Id:$(jwt_claims.tokenId)
+              - X-Service-Name:payment
       - name: rate-limiting
         config:
           minute: 50
@@ -150,11 +187,6 @@ services:
       - name: request-size-limiting
         config:
           allowed_payload_size: 10
-      - name: request-transformer
-        config:
-          add:
-            headers:
-              - X-Service-Name:payment
 
 plugins:
   - name: correlation-id
@@ -178,8 +210,13 @@ plugins:
       message: "Service temporarily unavailable"
 
 consumers:
-  - username: api-client
-    custom_id: api-client-001
+  - username: jwt-auth
+    custom_id: jwt-auth-001
+    jwt_secrets:
+      - key: nest-ecommerce-issuer
+        algorithm: HS256
+        secret: your-super-secret-jwt-key-change-in-production
+
 
 
 

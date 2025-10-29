@@ -6,9 +6,7 @@ const BINDINGS_METADATA = 'BINDINGS_METADATA';
 
 @Injectable()
 export class BindingsCollector {
-  constructor(
-    private readonly discoveryService: DiscoveryService,
-  ) {}
+  constructor(private readonly discoveryService: DiscoveryService) {}
 
   async collect(): Promise<BindingsMethodInterface[]> {
     const bindings: BindingsMethodInterface[] = [];
@@ -20,7 +18,8 @@ export class BindingsCollector {
 
       const prototype = Object.getPrototypeOf(instance);
       const methodNames = Object.getOwnPropertyNames(prototype).filter(
-        (name) => name !== 'constructor' && typeof prototype[name] === 'function'
+        (name) =>
+          name !== 'constructor' && typeof prototype[name] === 'function',
       );
 
       for (const methodName of methodNames) {

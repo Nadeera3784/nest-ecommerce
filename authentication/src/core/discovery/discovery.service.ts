@@ -21,7 +21,7 @@ export class DiscoveryService {
   ) {
     const modulesMap = [...this.modulesContainer.entries()];
     this.discoveredControllers = Promise.all(
-      flatMap(modulesMap, ([_key, nestModule]) => {
+      flatMap(modulesMap, ([, nestModule]) => {
         const components = [...nestModule.routes.values()];
         return components
           .filter((component) => component.scope !== Scope.REQUEST)
@@ -29,7 +29,7 @@ export class DiscoveryService {
       }),
     );
     this.discoveredProviders = Promise.all(
-      flatMap(modulesMap, ([_key, nestModule]) => {
+      flatMap(modulesMap, ([, nestModule]) => {
         const components = [...nestModule.components.values()];
         return components
           .filter((component) => component.scope !== Scope.REQUEST)
@@ -46,11 +46,11 @@ export class DiscoveryService {
 
   async methodsAndControllerMethodsWithMetaAtKey(
     metaKey: string,
-    metaFilter: (meta: any) => boolean = (meta) => true,
+    metaFilter: (meta: any) => boolean = () => true,
   ): Promise<DiscoveredMethod[]> {
     const controllersWithMeta = (
       await this.controllersWithMetaAtKey(metaKey)
-    ).filter((_x) => metaFilter(_x.meta));
+    ).filter((x) => metaFilter(x.meta));
     const methodsFromDecoratedControllers = flatMap(
       controllersWithMeta,
       (controller) => {
@@ -113,7 +113,7 @@ export class DiscoveryService {
 
   async providerMethodsWithMetaAtKey(
     metaKey: string,
-    providerFilter: (component: DiscoveredClass) => boolean = (x) => true,
+    providerFilter: (component: DiscoveredClass) => boolean = () => true,
   ): Promise<MetaData[]> {
     const providers = await this.providers(providerFilter);
     return flatMap(providers, (provider) =>
@@ -123,7 +123,7 @@ export class DiscoveryService {
 
   async controllerMethodsWithMetaAtKey(
     metaKey: string,
-    controllerFilter: (component: DiscoveredClass) => boolean = (x) => true,
+    controllerFilter: (component: DiscoveredClass) => boolean = () => true,
   ): Promise<MetaData[]> {
     const controllers = await this.controllers(controllerFilter);
     return flatMap(controllers, (controller) =>

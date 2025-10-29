@@ -4,22 +4,22 @@ import { NestLogger, NestLoggerFactory } from './services';
 
 @Global()
 @Module({
-    providers: [NestLoggerFactory, Logger],
+  providers: [NestLoggerFactory, Logger],
 })
 export class NesLoggerModule {
-    static forRoot(config: NestLoggerOptions): DynamicModule {
-        const providers = [
-            {
-                provide: NestLogger,
-                useValue: new NestLogger(config),
-            },
-            Logger,
-        ];
+  static forRoot(config: NestLoggerOptions): DynamicModule {
+    const providers = [
+      {
+        provide: NestLogger,
+        useValue: new NestLogger(config),
+      },
+      Logger,
+    ];
 
-        return {
-            exports: providers,
-            module: NesLoggerModule,
-            providers: providers,
-        };
-    }
+    return {
+      exports: providers,
+      module: NesLoggerModule,
+      providers: providers,
+    };
+  }
 }

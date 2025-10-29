@@ -36,8 +36,7 @@ export const environment: any = {
   oauthTokenExpiresIn: isNumeric(env.OAUTH_EXPIRES_IN) ? parseInt(env.OAUTH_EXPIRES_IN, 10) : env.OAUTH_EXPIRES_IN,
   oauthTokenInCookie: {
     allow: true,
-    //  @TODO: remove default value
-    domain: env.TOKEN_IN_COOKIE_DOMAIN || 'test.devpayever.com',
+    domain: env.TOKEN_IN_COOKIE_DOMAIN || 'test.test.com',
   },
   port: env.APP_PORT,
   production: env.PRODUCTION_MODE === 'true',
@@ -52,7 +51,7 @@ export const environment: any = {
     isGlobalPrefetchCount: false,
     prefetchCount: 10,
     rsa: {
-      private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
+      private: env.RABBITMQ_CERTIFICATE_PATH ? path.resolve(env.RABBITMQ_CERTIFICATE_PATH) : undefined,
     },
 
     exchanges: [
@@ -76,21 +75,21 @@ export const environment: any = {
   },
   recaptchaSecret: process.env.RECAPTCHA_SECRET,
   redis: {
-    clusterHosts: process.env.REDIS_CLUSTER_HOSTS.split(','),
-    connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT, 10),
+    clusterHosts: process.env.REDIS_CLUSTER_HOSTS ? process.env.REDIS_CLUSTER_HOSTS.split(',') : [],
+    connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT || '5000', 10),
     host: process.env.REDIS_HOST,
-    password: process.env.REDIS_PASSWORD,
-    port: +process.env.REDIS_PORT,
-    retryAttempts: parseInt(process.env.REDIS_RETRY_ATTEMPTS, 10),
-    retryDelay: parseInt(process.env.REDIS_RETRY_DELAY, 10),
+    password: process.env.REDIS_PASSWORD || '',
+    port: +(process.env.REDIS_PORT || '6379'),
+    retryAttempts: parseInt(process.env.REDIS_RETRY_ATTEMPTS || '5', 10),
+    retryDelay: parseInt(process.env.REDIS_RETRY_DELAY || '1000', 10),
     url: env.REDIS_URL,
   },
   refreshTokenExpiresIn: isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN)
     ? parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10)
     : env.JWT_REFRESH_TOKEN_EXPIRES_IN,
   rsa: {
-    private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
+    private: env.RABBITMQ_CERTIFICATE_PATH ? path.resolve(env.RABBITMQ_CERTIFICATE_PATH) : undefined,
   },
   statusPort: env.STATUS_APP_PORT,
-  trustedProxies: env.TRUSTED_PROXIES,
+  trustedProxies: env.TRUSTED_PROXIES || '',
 };

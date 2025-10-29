@@ -1,4 +1,4 @@
 export interface NestLoggerOptions {
-    isProduction: boolean;
-    applicationName: string;
+  isProduction: boolean;
+  applicationName: string;
 }

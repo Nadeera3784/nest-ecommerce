@@ -1,25 +1,27 @@
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { EventDispatcher } from '../event-dispatcher';
 import { ApmConfigService } from './apm-config.service';
-import { ApiLogEventEnum  } from './enums/api-logs-event.enum';
+import { ApiLogEventEnum } from './enums/api-logs-event.enum';
 
-type AnyRequest = {
-  body?: any;
-  headers?: any;
-  hostname?: string;
-  id?: any;
-  ip?: string;
-  ips?: string[];
-  log?: any;
-  method?: string;
-  params?: any;
-  protocol?: string;
-  query?: any;
-  routerPath?: string;
-  url?: string;
-  validationError?: any;
-  [key: string]: any;
-} | undefined;
+type AnyRequest =
+  | {
+      body?: any;
+      headers?: any;
+      hostname?: string;
+      id?: any;
+      ip?: string;
+      ips?: string[];
+      log?: any;
+      method?: string;
+      params?: any;
+      protocol?: string;
+      query?: any;
+      routerPath?: string;
+      url?: string;
+      validationError?: any;
+      [key: string]: any;
+    }
+  | undefined;
 
 @Injectable()
 export class ApiLogCollectingService {
@@ -35,7 +37,7 @@ export class ApiLogCollectingService {
     start: number,
   ): Promise<void> {
     await this.eventDispatcher.dispatch(
-      ApiLogEventEnum.APICALLTRACKED, 
+      ApiLogEventEnum.APICALLTRACKED,
       this.parseContext(context, data, error, start),
     );
   }
@@ -85,16 +87,13 @@ export class ApiLogCollectingService {
     try {
       const cache: any[] = [];
       body = JSON.parse(
-        JSON.stringify(
-          (request as AnyRequest)?.body,
-          (key, value) => {
-            if (typeof value === 'object' && value !== null) {
-              if (cache.includes(value)) return;
-              cache.push(value);
-            }
-            return value;
-          },
-        ),
+        JSON.stringify((request as AnyRequest)?.body, (key, value) => {
+          if (typeof value === 'object' && value !== null) {
+            if (cache.includes(value)) return;
+            cache.push(value);
+          }
+          return value;
+        }),
       );
     } catch {
       body = (request as AnyRequest)?.body;

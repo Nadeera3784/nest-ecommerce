@@ -1,4 +1,4 @@
-export  enum HttpLogContext {
-    HttpRequest = "HttpRequest",
-    HttpResponse = "HttpResponse"
+export enum HttpLogContext {
+  HttpRequest = 'HttpRequest',
+  HttpResponse = 'HttpResponse',
 }

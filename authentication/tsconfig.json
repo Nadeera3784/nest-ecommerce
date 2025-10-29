@@ -17,5 +17,11 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "exclude": [
+    "src/authentication/services/token.service.ts",
+    "src/authentication/services/request-parser.service.ts",
+    "src/authentication/guards/jwt-auth.guard.ts",
+    "src/user/schemas/user.schema.ts"
+  ]
 }

@@ -1,8 +1,10 @@
 import * as crypto from 'crypto';
 
 export class IpAddressEncoder {
-
-  public static encodeUsersIpAddress(ipAddress: string, userEmail: string): string {
+  public static encodeUsersIpAddress(
+    ipAddress: string,
+    userEmail: string,
+  ): string {
     if (!ipAddress) {
       return '';
     }

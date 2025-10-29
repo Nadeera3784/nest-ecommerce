@@ -1,4 +1,3 @@
-export * from './token.service';
-export * from './location.service';
-export * from './location-mailer.service';
-export * from './request-parser.service';
+export * from './auth.service';
+export * from './email.service';
+export * from './password-reset.service';

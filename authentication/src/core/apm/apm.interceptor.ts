@@ -1,4 +1,9 @@
-import { Injectable, CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
+import {
+  Injectable,
+  CallHandler,
+  ExecutionContext,
+  NestInterceptor,
+} from '@nestjs/common';
 import { tap, catchError } from 'rxjs/operators';
 import { ApiLogCollectingService } from './api-log-collecting.service';
 import { ApmService } from './apm.service';
@@ -11,22 +16,35 @@ export class ApmInterceptor implements NestInterceptor {
     private readonly apiLogCollectingService: ApiLogCollectingService,
   ) {}
 
-  intercept(context: ExecutionContext, next: CallHandler<any>): Observable<any> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler<any>,
+  ): Observable<any> {
     const startTime = Date.now();
 
     return next.handle().pipe(
       tap((data) => {
         try {
-          this.apiLogCollectingService.collectLog(context, data, null, startTime);
-        } catch (e) {
+          this.apiLogCollectingService.collectLog(
+            context,
+            data,
+            null,
+            startTime,
+          );
+        } catch {
           // intentionally ignored
         }
       }),
       catchError((error) => {
         try {
-          this.apiLogCollectingService.collectLog(context, null, error, startTime);
+          this.apiLogCollectingService.collectLog(
+            context,
+            null,
+            error,
+            startTime,
+          );
           this.apmService.captureError(error);
-        } catch (e) {
+        } catch {
           // intentionally ignored
         }
         throw error;

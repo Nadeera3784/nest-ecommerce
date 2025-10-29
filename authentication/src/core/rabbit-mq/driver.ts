@@ -51,7 +51,11 @@ export class Driver {
     consumerDependent: boolean,
   ): Promise<void> {
     for (const exchange of exchanges) {
-      await channel.assertExchange(exchange.name, exchange.type, exchange.options as any);
+      await channel.assertExchange(
+        exchange.name,
+        exchange.type,
+        exchange.options as any,
+      );
       await channel.assertExchange(
         this.generateFallbackName(exchange.name),
         exchange.type,
@@ -74,7 +78,11 @@ export class Driver {
       queues: Array<{
         name: string;
         consumerDependent?: boolean;
-        options: { deadLetterExchange?: string; arguments?: any; [k: string]: any };
+        options: {
+          deadLetterExchange?: string;
+          arguments?: any;
+          [k: string]: any;
+        };
       }>;
     },
     bindings: BindingsMethodInterface[],

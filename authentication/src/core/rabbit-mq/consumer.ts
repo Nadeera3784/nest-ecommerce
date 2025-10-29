@@ -36,7 +36,10 @@ export class Consumer extends Server implements CustomTransportStrategy {
   ): void {
     const routingKey = pattern.routingKey ? pattern.routingKey : pattern.name;
     BindingNameValidator.validate(routingKey);
-    BindingChannelQueueValidator.validate(pattern, this.config.getQueuesNames());
+    BindingChannelQueueValidator.validate(
+      pattern,
+      this.config.getQueuesNames(),
+    );
 
     const route = transformPatternToRoute(pattern);
 
@@ -204,15 +207,12 @@ export class Consumer extends Server implements CustomTransportStrategy {
   }
 
   // Required by Server interface
-  on<EventKey extends string = string, EventCallback extends Function = Function>(
-    event: EventKey,
-    callback: EventCallback
-  ): any {
+  on(): any {
     // Implementation can be added if needed
     return this;
   }
 
-  // Required by Server interface  
+  // Required by Server interface
   unwrap(): any {
     return this.connection;
   }

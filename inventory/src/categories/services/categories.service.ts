@@ -32,11 +32,16 @@ export class CategoriesService {
     return created;
   }
 
-  async update(id: string, payload: UpdateCategoryDto): Promise<CategoryDocument> {
+  async update(
+    id: string,
+    payload: UpdateCategoryDto,
+  ): Promise<CategoryDocument> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Category not found');
     }
-    const updated = await this.categoryModel.findByIdAndUpdate(id, payload, { new: true }).exec();
+    const updated = await this.categoryModel
+      .findByIdAndUpdate(id, payload, { new: true })
+      .exec();
     if (!updated) {
       throw new NotFoundException('Category not found');
     }

@@ -1,34 +1,22 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { environment } from './environments';
-import { NesLoggerModule } from './core/nest-logger';
-import { ApmModule } from './core/apm/apm.module';
-import { CommandModule } from './core/command';
-import { RabbitMqModule } from './core/rabbit-mq';
-import { MongooseModule } from '@nestjs/mongoose';
-import { JwtModule } from '@nestjs/jwt';
-import { PaymentsModule } from './payments/payments.module';
-import { TransactionsModule } from './transactions/transactions.module';
+import { Module } from '@nestjs/common';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
-    NesLoggerModule.forRoot({
-      applicationName: environment.applicationName,
-      isProduction: environment.production,
-    }),
-    JwtModule.register(environment.jwtOptions),
-    MongooseModule.forRoot(
-      environment.mongodb,
-    ),
-    ApmModule.forRoot(environment.apm.enable, environment.apm.options),
-    CommandModule,
-    RabbitMqModule.forRoot(environment.rabbitmq),
-    PaymentsModule,
-    TransactionsModule,
+    // TODO: Re-enable these modules after fixing their dependencies
+    // NesLoggerModule.forRoot({
+    //   applicationName: environment.applicationName,
+    //   isProduction: environment.production,
+    // }),
+    // JwtModule.register(environment.jwtOptions),
+    // MongooseModule.forRoot(environment.mongodb),
+    // ApmModule.forRoot(environment.apm.enable, environment.apm.options),
+    // CommandModule,
+    // RabbitMqModule.forRoot(environment.rabbitmq),
+    // PaymentsModule,
+    // TransactionsModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [],
 })
-
-export class ApplicationModule implements NestModule {
-  public configure(): MiddlewareConsumer | void { }
-}
+export class ApplicationModule {}

@@ -35,31 +35,41 @@ describe('ProductsService', () => {
   });
 
   it('findOne throws for invalid id', async () => {
-    await expect(service.findOne('bad')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findOne('bad')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('findOne returns doc', async () => {
     const exec = jest.fn().mockResolvedValue({ id: '1' });
     (model.findById as any).mockReturnValue({ exec });
-    expect(await service.findOne(new Types.ObjectId().toString())).toEqual({ id: '1' } as any);
+    expect(await service.findOne(new Types.ObjectId().toString())).toEqual({
+      id: '1',
+    } as any);
   });
 
   it('create stores doc', async () => {
     (model.create as any).mockResolvedValue({ id: '1' });
-    expect(await service.create({ name: 'x' } as any)).toEqual({ id: '1' } as any);
+    expect(await service.create({ name: 'x' } as any)).toEqual({
+      id: '1',
+    } as any);
   });
 
   it('update updates doc', async () => {
     const exec = jest.fn().mockResolvedValue({ id: '1' });
     (model.findByIdAndUpdate as any).mockReturnValue({ exec });
-    expect(await service.update(new Types.ObjectId().toString(), { name: 'y' } as any)).toEqual({ id: '1' } as any);
+    expect(
+      await service.update(new Types.ObjectId().toString(), {
+        name: 'y',
+      } as any),
+    ).toEqual({ id: '1' } as any);
   });
 
   it('remove deletes doc', async () => {
     const exec = jest.fn().mockResolvedValue({ id: '1' });
     (model.findByIdAndDelete as any).mockReturnValue({ exec });
-    expect(await service.remove(new Types.ObjectId().toString())).toEqual({ deleted: true });
+    expect(await service.remove(new Types.ObjectId().toString())).toEqual({
+      deleted: true,
+    });
   });
 });
-
-

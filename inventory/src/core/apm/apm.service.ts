@@ -71,13 +71,13 @@ export class ApmService {
       return err;
     }
     // unwrap inner error if necessary
-    // @ts-ignore
+    // @ts-expect-error - Legacy APM configuration
     if (err.message instanceof Error) {
       return err.message;
     }
     try {
       const errClone = copy(err);
-      // @ts-ignore
+      // @ts-expect-error - Legacy APM configuration
       errClone.__error_callsites = err.__error_callsites;
       errClone.message = JSON.stringify(errClone.message, null, ' ');
       return errClone;

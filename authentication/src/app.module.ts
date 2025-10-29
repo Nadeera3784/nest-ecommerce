@@ -1,32 +1,34 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { environment } from './environments';
-import { NesLoggerModule } from './core/nest-logger';
-import { ApmModule } from './core/apm/apm.module';
-import { CommandModule } from './core/command';
-import { RabbitMqModule } from './core/rabbit-mq';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { JwtModule } from '@nestjs/jwt';
-import { TokensGenerationService } from './authentication/services/tokens-generation.service';
+import { BullModule } from '@nestjs/bullmq';
+import { AuthenticationModule } from './authentication/authentication.module';
+import { UserModule } from './user/user.module';
+import { environment } from './environments/environment';
 
 @Module({
   imports: [
-    NesLoggerModule.forRoot({
-      applicationName: environment.applicationName,
-      isProduction: environment.production,
+    MongooseModule.forRoot(environment.mongodb, {
+      connectionFactory: (connection) => {
+        connection.on('connected', () => {
+          console.log('MongoDB connected successfully');
+        });
+        connection.on('error', (error) => {
+          console.error('MongoDB connection error:', error);
+        });
+        return connection;
+      },
     }),
-    JwtModule.register(environment.jwtOptions),
-    MongooseModule.forRoot(
-      environment.mongodb,
-    ),
-    ApmModule.forRoot(environment.apm.enable, environment.apm.options),
-    CommandModule,
-    RabbitMqModule.forRoot(environment.rabbitmq),
+    BullModule.forRoot({
+      connection: {
+        host: environment.redis.host,
+        port: environment.redis.port,
+        password: environment.redis.password,
+      },
+    }),
+    AuthenticationModule,
+    UserModule,
   ],
   controllers: [],
-  providers: [TokensGenerationService],
+  providers: [],
 })
-
-export class ApplicationModule implements NestModule {
-  public configure(): MiddlewareConsumer | void { }
-}
-
+export class ApplicationModule {}

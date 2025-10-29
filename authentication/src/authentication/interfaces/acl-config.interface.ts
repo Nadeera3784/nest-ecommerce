@@ -1,4 +1,4 @@
 export interface AclConfigInterface {
-    microservice: string;
-    action: string;
+  microservice: string;
+  action: string;
 }

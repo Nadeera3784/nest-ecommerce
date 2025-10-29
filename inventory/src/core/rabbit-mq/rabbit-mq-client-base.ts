@@ -37,7 +37,7 @@ export abstract class RabbitMqClientBase
     await this.close();
   }
 
-  async onApplicationShutdown(_signal?: string): Promise<void> {
+  async onApplicationShutdown(): Promise<void> {
     await this.close();
   }
 

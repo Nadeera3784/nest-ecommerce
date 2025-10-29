@@ -1,3 +1,3 @@
 export enum ApiLogEventEnum {
-    APICALLTRACKED = "api.call.tracked"
+  APICALLTRACKED = 'api.call.tracked',
 }

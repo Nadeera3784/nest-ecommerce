@@ -23,20 +23,31 @@ export class OrderEventsController implements OnModuleInit {
   onModuleInit(): any {
     // Ensure binding exists for routing key -> queue
     this.connection.createChannel(this.queueName, async (channel) => {
-      await channel.assertExchange(this.exchangeName, 'direct', { durable: true } as any);
+      await channel.assertExchange(this.exchangeName, 'direct', {
+        durable: true,
+      } as any);
       await channel.assertQueue(this.queueName, { durable: true } as any);
-      await channel.bindQueue(this.queueName, this.exchangeName, InventoryMessagesEnum.OrderPaid);
+      await channel.bindQueue(
+        this.queueName,
+        this.exchangeName,
+        InventoryMessagesEnum.OrderPaid,
+      );
     });
 
     // Register handler for order paid messages
-    this.consumer.addHandler({ name: InventoryMessagesEnum.OrderPaid, channel: this.queueName }, async (message: any) => {
-      const { payload } = message || {};
-      const items: Array<{ productId: string; qty: number }> = payload?.items || [];
-      for (const item of items) {
-        try {
-          await this.productsService.decrementStock(item.productId, item.qty);
-        } catch (_) {}
-      }
-    }, true);
+    this.consumer.addHandler(
+      { name: InventoryMessagesEnum.OrderPaid, channel: this.queueName },
+      async (message: any) => {
+        const { payload } = message || {};
+        const items: Array<{ productId: string; qty: number }> =
+          payload?.items || [];
+        for (const item of items) {
+          try {
+            await this.productsService.decrementStock(item.productId, item.qty);
+          } catch (_) {}
+        }
+      },
+      true,
+    );
   }
 }

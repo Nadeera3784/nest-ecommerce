@@ -2,22 +2,26 @@ import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { utc } from 'moment';
 
-import { ExpiredPasswordException, MalformedPasswordException } from '../exceptions';
+import {
+  ExpiredPasswordException,
+  MalformedPasswordException,
+} from '../exceptions';
 import { environment } from '../../../../environments';
 
 @Injectable()
 export class EncryptionService {
-
   public async getPublicKey(): Promise<string> {
     const pubKeyObject: crypto.KeyObject = crypto.createPublicKey({
       format: 'pem',
       key: environment.encryption.masterKey,
     });
 
-    return pubKeyObject.export({
-      format: 'pem',
-      type: 'pkcs1',
-    }).toString();
+    return pubKeyObject
+      .export({
+        format: 'pem',
+        type: 'pkcs1',
+      })
+      .toString();
   }
 
   public async decrypt(encryptedString: string): Promise<string> {
@@ -33,7 +37,7 @@ export class EncryptionService {
       );
 
       return decryptedString.toString('utf8');
-    } catch (e) {
+    } catch {
       throw new MalformedPasswordException();
     }
   }

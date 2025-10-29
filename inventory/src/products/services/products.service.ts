@@ -32,11 +32,16 @@ export class ProductsService {
     return created;
   }
 
-  async update(id: string, payload: UpdateProductDto): Promise<ProductDocument> {
+  async update(
+    id: string,
+    payload: UpdateProductDto,
+  ): Promise<ProductDocument> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Product not found');
     }
-    const updated = await this.productModel.findByIdAndUpdate(id, payload, { new: true }).exec();
+    const updated = await this.productModel
+      .findByIdAndUpdate(id, payload, { new: true })
+      .exec();
     if (!updated) {
       throw new NotFoundException('Product not found');
     }
@@ -45,7 +50,9 @@ export class ProductsService {
 
   async decrementStock(productId: string, by: number): Promise<void> {
     if (!Types.ObjectId.isValid(productId)) return;
-    await this.productModel.findByIdAndUpdate(productId, { $inc: { stock: -Math.abs(by) } }).exec();
+    await this.productModel
+      .findByIdAndUpdate(productId, { $inc: { stock: -Math.abs(by) } })
+      .exec();
   }
 
   async remove(id: string): Promise<{ deleted: boolean }> {

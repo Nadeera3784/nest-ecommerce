@@ -4,7 +4,13 @@ import { ProductsService } from '../services/products.service';
 
 describe('ProductsController', () => {
   let controller: ProductsController;
-  let service: { findAll: jest.Mock; findOne: jest.Mock; create: jest.Mock; update: jest.Mock; remove: jest.Mock };
+  let service: {
+    findAll: jest.Mock;
+    findOne: jest.Mock;
+    create: jest.Mock;
+    update: jest.Mock;
+    remove: jest.Mock;
+  };
 
   beforeEach(async () => {
     service = {
@@ -17,9 +23,7 @@ describe('ProductsController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProductsController],
-      providers: [
-        { provide: ProductsService, useValue: service },
-      ],
+      providers: [{ provide: ProductsService, useValue: service }],
     }).compile();
 
     controller = module.get(ProductsController);
@@ -42,7 +46,9 @@ describe('ProductsController', () => {
 
   it('update delegates to service', async () => {
     service.update.mockResolvedValue({ id: '1' });
-    expect(await controller.update('1', { name: 'y' } as any)).toEqual({ id: '1' });
+    expect(await controller.update('1', { name: 'y' } as any)).toEqual({
+      id: '1',
+    });
   });
 
   it('remove delegates to service', async () => {
@@ -50,5 +56,3 @@ describe('ProductsController', () => {
     expect(await controller.remove('1')).toEqual({ deleted: true });
   });
 });
-
-

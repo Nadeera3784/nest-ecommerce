@@ -1,4 +1,4 @@
-import { TokenType } from "../enum";
+import { TokenType } from '../enum';
 
 export interface RefreshPayload {
   payload: {

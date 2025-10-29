@@ -1,19 +1,18 @@
 import {
-    registerDecorator,
-    ValidationArguments,
-    ValidationOptions,
-    ValidatorConstraint,
-    ValidatorConstraintInterface,
-  } from 'class-validator';
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 import passwordSchema from '../../user/tools/password.schema';
-  
+
 @ValidatorConstraint({ async: false })
 class PasswordIsStrong implements ValidatorConstraintInterface {
-  public validate(password: string, _args: ValidationArguments): boolean {
+  public validate(password: string): boolean {
     return passwordSchema.validate(password);
   }
 
-  public defaultMessage(_args: ValidationArguments): string {
+  public defaultMessage(): string {
     return `forms.error.validator.password.weak`;
   }
 }
