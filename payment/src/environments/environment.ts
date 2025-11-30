@@ -29,11 +29,15 @@ export const environment: any = {
     // @see https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback
     secret: env.JWT_SECRET_TOKEN,
     signOptions: {
-      expiresIn: isNumeric(env.JWT_EXPIRES_IN) ? parseInt(env.JWT_EXPIRES_IN, 10) : env.JWT_EXPIRES_IN,
+      expiresIn: isNumeric(env.JWT_EXPIRES_IN)
+        ? parseInt(env.JWT_EXPIRES_IN, 10)
+        : env.JWT_EXPIRES_IN,
     },
   },
   mongodb: env.MONGODB_URL,
-  oauthTokenExpiresIn: isNumeric(env.OAUTH_EXPIRES_IN) ? parseInt(env.OAUTH_EXPIRES_IN, 10) : env.OAUTH_EXPIRES_IN,
+  oauthTokenExpiresIn: isNumeric(env.OAUTH_EXPIRES_IN)
+    ? parseInt(env.OAUTH_EXPIRES_IN, 10)
+    : env.OAUTH_EXPIRES_IN,
   oauthTokenInCookie: {
     allow: true,
     domain: env.TOKEN_IN_COOKIE_DOMAIN || 'test.test.com',
@@ -51,7 +55,9 @@ export const environment: any = {
     isGlobalPrefetchCount: false,
     prefetchCount: 10,
     rsa: {
-      private: env.RABBITMQ_CERTIFICATE_PATH ? path.resolve(env.RABBITMQ_CERTIFICATE_PATH) : undefined,
+      private: env.RABBITMQ_CERTIFICATE_PATH
+        ? path.resolve(env.RABBITMQ_CERTIFICATE_PATH)
+        : undefined,
     },
 
     exchanges: [
@@ -69,13 +75,23 @@ export const environment: any = {
               durable: true,
             },
           },
+          {
+            name: MessageBusChannelsEnum.inventory,
+            options: {
+              deadLetterExchange: 'async_events_fallback',
+              deadLetterRoutingKey: MessageBusChannelsEnum.inventory,
+              durable: true,
+            },
+          },
         ],
       },
     ],
   },
   recaptchaSecret: process.env.RECAPTCHA_SECRET,
   redis: {
-    clusterHosts: process.env.REDIS_CLUSTER_HOSTS ? process.env.REDIS_CLUSTER_HOSTS.split(',') : [],
+    clusterHosts: process.env.REDIS_CLUSTER_HOSTS
+      ? process.env.REDIS_CLUSTER_HOSTS.split(',')
+      : [],
     connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT || '5000', 10),
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD || '',
@@ -88,7 +104,9 @@ export const environment: any = {
     ? parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10)
     : env.JWT_REFRESH_TOKEN_EXPIRES_IN,
   rsa: {
-    private: env.RABBITMQ_CERTIFICATE_PATH ? path.resolve(env.RABBITMQ_CERTIFICATE_PATH) : undefined,
+    private: env.RABBITMQ_CERTIFICATE_PATH
+      ? path.resolve(env.RABBITMQ_CERTIFICATE_PATH)
+      : undefined,
   },
   statusPort: env.STATUS_APP_PORT,
   trustedProxies: env.TRUSTED_PROXIES || '',

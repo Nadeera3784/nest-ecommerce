@@ -4,9 +4,17 @@ import {
   OnApplicationShutdown,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { connect, AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
+import {
+  connect,
+  AmqpConnectionManager,
+  ChannelWrapper,
+} from 'amqp-connection-manager';
 import type { Channel } from 'amqplib';
-import { CONNECT_EVENT, DISCONNECT_EVENT, DISCONNECT_MESSAGE } from './constants';
+import {
+  CONNECT_EVENT,
+  DISCONNECT_EVENT,
+  DISCONNECT_MESSAGE,
+} from './constants';
 import { RabbitMqConfig } from './rabbit-mq.config';
 
 type ChannelItem = {
@@ -15,7 +23,8 @@ type ChannelItem = {
 };
 
 @Injectable()
-export class RabbitMqConnection implements OnModuleDestroy, OnApplicationShutdown
+export class RabbitMqConnection
+  implements OnModuleDestroy, OnApplicationShutdown
 {
   private loggerContext = 'RabbitMqConnection';
   private server?: AmqpConnectionManager;

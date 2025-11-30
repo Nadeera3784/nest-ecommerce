@@ -19,10 +19,12 @@ export class RabbitMqRPCClient extends RabbitMqClientBase {
     const routingKey = pattern.channel;
     if (!routingKey) {
       throw new Error(
-        `Trying to publish message without specifying channel. Message: ${JSON.stringify({
-          pattern,
-          payload,
-        })}`,
+        `Trying to publish message without specifying channel. Message: ${JSON.stringify(
+          {
+            pattern,
+            payload,
+          },
+        )}`,
       );
     }
 

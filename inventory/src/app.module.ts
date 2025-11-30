@@ -4,6 +4,7 @@ import { HealthController } from './health.controller';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { RabbitMqModule } from './core/rabbit-mq';
 import { environment } from './environments/environment';
 
 @Module({
@@ -19,6 +20,7 @@ import { environment } from './environments/environment';
         return connection;
       },
     }),
+    RabbitMqModule.forRoot(environment.rabbitmq),
     AuthModule,
     ProductsModule,
     CategoriesModule,

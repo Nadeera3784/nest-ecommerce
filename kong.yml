@@ -188,6 +188,68 @@ services:
         config:
           allowed_payload_size: 10
 
+  - name: order-service
+    url: http://order:3000
+    protocol: http
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    routes:
+      - name: order-routes
+        paths:
+          - /api/orders
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+    plugins:
+      - name: jwt
+        config:
+          uri_param_names: []
+          cookie_names: []
+          claims_to_verify:
+            - exp
+          key_claim_name: iss
+          secret_is_base64: false
+          anonymous: null
+          run_on_preflight: true
+          maximum_expiration: 0
+          header_names:
+            - authorization
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - X-User-Id:$(jwt_claims.userId)
+              - X-User-Email:$(jwt_claims.email)
+              - X-Token-Id:$(jwt_claims.tokenId)
+              - X-Service-Name:order
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+          policy: local
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+          credentials: true
+          max_age: 3600
+
 plugins:
   - name: correlation-id
     config:

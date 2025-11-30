@@ -1,5 +1,6 @@
 export enum MessageBusChannelsEnum {
   auth = 'async_events_auth_micro',
+  inventory = 'async_events_inventory_micro',
 }
 
 export enum PaymentInventoryMessagesEnum {

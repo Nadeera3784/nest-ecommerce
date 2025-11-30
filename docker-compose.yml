@@ -153,6 +153,25 @@ services:
     networks:
       - ecommerce-network
 
+  mongo_order:
+    image: mongo:7.0
+    container_name: mongo-order
+    restart: always
+    ports:
+      - 27020:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - 'mongodb_order_data:/data/db'
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
+
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
@@ -283,6 +302,36 @@ services:
     ports:
       - "${PAYMENT_PORT}:3000"
 
+  order:
+    build:
+      context: ./order
+    container_name: order-service
+    restart: unless-stopped
+    depends_on:
+      mongo_order:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_URL=${MONGODB_ORDER_URL}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET_TOKEN=${JWT_SECRET_TOKEN}
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ecommerce-network
+    ports:
+      - "${ORDER_PORT}:3000"
+
 
   # es01:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
@@ -314,6 +363,8 @@ volumes:
   mongodb_inventory_data:
     driver: local
   mongodb_payment_data:
+    driver: local
+  mongodb_order_data:
     driver: local
   rabbitmq_data:
     driver: local

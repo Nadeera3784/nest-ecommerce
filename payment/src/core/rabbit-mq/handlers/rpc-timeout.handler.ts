@@ -5,7 +5,6 @@ export class RpcTimeoutHandler {
     this.timeoutMs = timeout;
   }
 
-
   handle<T>(promise: Promise<T>): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
@@ -13,11 +12,11 @@ export class RpcTimeoutHandler {
       }, this.timeoutMs);
 
       promise
-        .then(result => {
+        .then((result) => {
           clearTimeout(timer);
           resolve(result);
         })
-        .catch(err => {
+        .catch((err) => {
           clearTimeout(timer);
           reject(err);
         });

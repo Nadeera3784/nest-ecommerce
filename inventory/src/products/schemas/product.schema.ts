@@ -1,14 +1,7 @@
 import { Schema, Document } from 'mongoose';
+import { Product } from '../interfaces/product.interface';
 
-export interface ProductDocument extends Document {
-  name: string;
-  description?: string;
-  price: number;
-  stock: number;
-  categoryId?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export interface ProductDocument extends Product, Document {}
 
 export const PRODUCT_MODEL = 'Product';
 

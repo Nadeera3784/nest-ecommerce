@@ -38,8 +38,9 @@ make kong-test
 | **Kong Gateway** | API Gateway | 8000 | - |
 | **Authentication** | User auth & management | 3001 | `/api/auth/*` |
 | **Inventory** | Products & categories | 3002 | `/api/inventory/*` |
-| **Payment** | Orders & transactions | 3003 | `/api/payment/*` |
-| **MongoDB** | Database | 27017-27019 | - |
+| **Payment** | Payment & transactions | 3003 | `/api/payment/*` |
+| **Order** | Shopping cart & orders | 3004 | `/api/orders/*` |
+| **MongoDB** | Database | 27017-27020 | - |
 | **RabbitMQ** | Message broker | 5672 | - |
 | **Redis** | Cache | 6379 | - |
 
@@ -47,33 +48,6 @@ make kong-test
 
 All APIs are accessed through Kong Gateway at **http://localhost:8000**
 
-### Authentication Service
-```bash
-POST   /api/auth/register       # Register new user
-POST   /api/auth/login          # User login
-GET    /api/auth/profile        # Get user profile
-POST   /api/auth/logout         # User logout
-POST   /api/auth/refresh        # Refresh token
-```
-
-### Inventory Service
-```bash
-GET    /api/inventory/products          # List all products
-GET    /api/inventory/products/:id      # Get product details
-POST   /api/inventory/products          # Create product (admin)
-PUT    /api/inventory/products/:id      # Update product (admin)
-DELETE /api/inventory/products/:id      # Delete product (admin)
-GET    /api/inventory/categories        # List categories
-```
-
-### Payment Service
-```bash
-POST   /api/payment/checkout            # Process checkout
-GET    /api/payment/orders              # List user orders
-GET    /api/payment/orders/:id          # Get order details
-POST   /api/payment/refund              # Request refund
-GET    /api/payment/transactions        # List transactions
-```
 
 ## Management Commands
 
@@ -144,6 +118,7 @@ curl http://localhost:8001/status
 curl http://localhost:8000/api/auth/health
 curl http://localhost:8000/api/inventory/health
 curl http://localhost:8000/api/payment/health
+curl http://localhost:8000/api/orders/health
 ```
 
 ## Configuration
@@ -193,6 +168,7 @@ docker-compose up -d --scale kong=3
 docker-compose up -d --scale authentication=3
 docker-compose up -d --scale inventory=5
 docker-compose up -d --scale payment=2
+docker-compose up -d --scale order=3
 ```
 
 Kong automatically load balances across all instances!
@@ -205,6 +181,7 @@ Kong automatically load balances across all instances!
 cd authentication && npm test
 cd inventory && npm test
 cd payment && npm test
+cd order && npm test
 ```
 
 ### Integration Tests
@@ -222,34 +199,6 @@ make rate-limit-test
 
 # Custom load test
 make load-test
-```
-
-## Structure
-
-```
-nest-ecommerce/
-├── authentication/          # Authentication microservice
-│   ├── src/
-│   │   ├── authentication/
-│   │   ├── user/
-│   │   └── main.ts
-│   └── package.json
-├── inventory/              # Inventory microservice
-│   ├── src/
-│   │   ├── products/
-│   │   ├── categories/
-│   │   └── main.ts
-│   └── package.json
-├── payment/                # Payment microservice
-│   ├── src/
-│   │   ├── payments/
-│   │   ├── transactions/
-│   │   └── main.ts
-│   └── package.json
-├── docker-compose.yml      # Docker Compose configuration
-├── kong.yml               # Kong declarative config (optional)
-├── kong-admin-api-examples.sh  # Kong configuration script
-├── Makefile               # Management commands
 ```
 
 

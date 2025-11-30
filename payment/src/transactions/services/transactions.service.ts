@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { TRANSACTION_MODEL, TransactionDocument } from '../schemas/transaction.schema';
+import {
+  TRANSACTION_MODEL,
+  TransactionDocument,
+} from '../schemas/transaction.schema';
 
 @Injectable()
 export class TransactionsService {
@@ -11,7 +14,11 @@ export class TransactionsService {
   ) {}
 
   async findAll(): Promise<TransactionDocument[]> {
-    return this.transactionModel.find().sort({ createdAt: -1 }).lean(false).exec();
+    return this.transactionModel
+      .find()
+      .sort({ createdAt: -1 })
+      .lean(false)
+      .exec();
   }
 
   async findOne(id: string): Promise<TransactionDocument> {
@@ -23,16 +30,24 @@ export class TransactionsService {
     return doc;
   }
 
-  async create(payload: Partial<TransactionDocument>): Promise<TransactionDocument> {
+  async create(
+    payload: Partial<TransactionDocument>,
+  ): Promise<TransactionDocument> {
     const created = await this.transactionModel.create(payload as any);
     return created;
   }
 
   async findByUser(userId: string): Promise<TransactionDocument[]> {
-    return this.transactionModel.find({ userId }).sort({ createdAt: -1 }).exec();
+    return this.transactionModel
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   async findByPayment(paymentId: string): Promise<TransactionDocument[]> {
-    return this.transactionModel.find({ paymentId }).sort({ createdAt: -1 }).exec();
+    return this.transactionModel
+      .find({ paymentId })
+      .sort({ createdAt: -1 })
+      .exec();
   }
 }

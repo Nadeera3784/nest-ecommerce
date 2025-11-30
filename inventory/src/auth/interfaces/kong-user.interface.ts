@@ -3,4 +3,3 @@ export interface KongUser {
   email: string;
   tokenId: string;
 }
-

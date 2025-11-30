@@ -31,7 +31,10 @@ export class PaymentsService {
   }
 
   async create(payload: CreatePaymentDto): Promise<PaymentDocument> {
-    const created = await this.paymentModel.create({ ...payload, status: 'processing' } as any);
+    const created = await this.paymentModel.create({
+      ...payload,
+      status: 'processing',
+    } as any);
     await this.transactionsService.create({
       type: 'payment',
       amount: created.amount,
@@ -44,11 +47,16 @@ export class PaymentsService {
     return created;
   }
 
-  async update(id: string, payload: UpdatePaymentDto): Promise<PaymentDocument> {
+  async update(
+    id: string,
+    payload: UpdatePaymentDto,
+  ): Promise<PaymentDocument> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Payment not found');
     }
-    const updated = await this.paymentModel.findByIdAndUpdate(id, payload, { new: true }).exec();
+    const updated = await this.paymentModel
+      .findByIdAndUpdate(id, payload, { new: true })
+      .exec();
     if (!updated) throw new NotFoundException('Payment not found');
 
     if (payload?.status === 'completed') {
@@ -63,9 +71,14 @@ export class PaymentsService {
     return updated;
   }
 
-  async refund(id: string, refundDto: { amount: number; reason?: string }): Promise<{ refunded: boolean; payment: PaymentDocument }> {
+  async refund(
+    id: string,
+    refundDto: { amount: number; reason?: string },
+  ): Promise<{ refunded: boolean; payment: PaymentDocument }> {
     const payment = await this.findOne(id);
-    const updated = await this.paymentModel.findByIdAndUpdate(id, { status: 'refunded' }, { new: true }).exec();
+    const updated = await this.paymentModel
+      .findByIdAndUpdate(id, { status: 'refunded' }, { new: true })
+      .exec();
     await this.transactionsService.create({
       type: 'refund',
       amount: refundDto.amount ?? payment.amount,
@@ -80,7 +93,9 @@ export class PaymentsService {
 
   async remove(id: string): Promise<{ cancelled: boolean }> {
     const payment = await this.findOne(id);
-    await this.paymentModel.findByIdAndUpdate(payment.id, { status: 'cancelled' }).exec();
+    await this.paymentModel
+      .findByIdAndUpdate(payment.id, { status: 'cancelled' })
+      .exec();
     return { cancelled: true };
   }
 }

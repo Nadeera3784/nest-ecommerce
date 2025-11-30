@@ -25,7 +25,12 @@ export class RabbitMqClient extends RabbitMqClientBase {
     }
 
     const { exchange } = pattern;
-    await this.channelWrapper.publish(exchange, routingKey, data, pattern.options);
+    await this.channelWrapper.publish(
+      exchange,
+      routingKey,
+      data,
+      pattern.options,
+    );
 
     const shouldLog = this.config.shouldLogEvents() && !noLogData;
     if (shouldLog) {

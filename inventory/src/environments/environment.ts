@@ -34,8 +34,7 @@ export const environment: any = {
         : env.JWT_EXPIRES_IN,
     },
   },
-  mongodb:
-    env.MONGODB_URL,
+  mongodb: env.MONGODB_URL,
   oauthTokenExpiresIn: isNumeric(env.OAUTH_EXPIRES_IN)
     ? parseInt(env.OAUTH_EXPIRES_IN, 10)
     : env.OAUTH_EXPIRES_IN,
@@ -74,6 +73,14 @@ export const environment: any = {
             options: {
               deadLetterExchange: 'async_events_fallback',
               deadLetterRoutingKey: MessageBusChannelsEnum.auth,
+              durable: true,
+            },
+          },
+          {
+            name: MessageBusChannelsEnum.inventory,
+            options: {
+              deadLetterExchange: 'async_events_fallback',
+              deadLetterRoutingKey: MessageBusChannelsEnum.inventory,
               durable: true,
             },
           },

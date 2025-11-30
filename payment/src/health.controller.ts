@@ -7,10 +7,7 @@ export class HealthController {
     return {
       status: 'ok',
       service: 'payment',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
-
-
-

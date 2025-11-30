@@ -4,16 +4,15 @@ import { PaymentsService } from './services/payments.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PAYMENT_MODEL, PaymentSchema } from './schemas/payment.schema';
 import { TransactionsModule } from '../transactions/transactions.module';
+import { RmqSender } from '../common/rmq.sender';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: PAYMENT_MODEL, schema: PaymentSchema },
-    ]),
+    MongooseModule.forFeature([{ name: PAYMENT_MODEL, schema: PaymentSchema }]),
     TransactionsModule,
   ],
   controllers: [PaymentsController],
-  providers: [PaymentsService],
+  providers: [PaymentsService, RmqSender],
   exports: [PaymentsService],
 })
 export class PaymentsModule {}

@@ -46,7 +46,9 @@ export class RabbitMqModule {
       },
     ];
 
-    const queueProviders = consumersProvidersFactory((rabbitMqConfig as any).consumers || []);
+    const queueProviders = consumersProvidersFactory(
+      (rabbitMqConfig as any).consumers || [],
+    );
     for (const provider of queueProviders) {
       providers.push(provider);
     }

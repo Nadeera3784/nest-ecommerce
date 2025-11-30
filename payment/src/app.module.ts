@@ -1,20 +1,27 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { HealthController } from './health.controller';
+import { RabbitMqModule } from './core/rabbit-mq';
+import { PaymentsModule } from './payments/payments.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { environment } from './environments/environment';
 
 @Module({
   imports: [
-    // TODO: Re-enable these modules after fixing their dependencies
-    // NesLoggerModule.forRoot({
-    //   applicationName: environment.applicationName,
-    //   isProduction: environment.production,
-    // }),
-    // JwtModule.register(environment.jwtOptions),
-    // MongooseModule.forRoot(environment.mongodb),
-    // ApmModule.forRoot(environment.apm.enable, environment.apm.options),
-    // CommandModule,
-    // RabbitMqModule.forRoot(environment.rabbitmq),
-    // PaymentsModule,
-    // TransactionsModule,
+    MongooseModule.forRoot(environment.mongodb, {
+      connectionFactory: (connection) => {
+        connection.on('connected', () => {
+          console.log('MongoDB connected successfully');
+        });
+        connection.on('error', (error) => {
+          console.error('MongoDB connection error:', error);
+        });
+        return connection;
+      },
+    }),
+    RabbitMqModule.forRoot(environment.rabbitmq),
+    PaymentsModule,
+    TransactionsModule,
   ],
   controllers: [HealthController],
   providers: [],

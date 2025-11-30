@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { PaymentsService } from '../services/payments.service';
 import { CreatePaymentDto } from '../dtos/create-payment.dto';
 import { UpdatePaymentDto } from '../dtos/update-payment.dto';
@@ -23,12 +31,18 @@ export class PaymentsController {
   }
 
   @Post(':id/refund')
-  async refund(@Param('id') id: string, @Body() refundDto: { amount: number; reason?: string }) {
+  async refund(
+    @Param('id') id: string,
+    @Body() refundDto: { amount: number; reason?: string },
+  ) {
     return this.paymentsService.refund(id, refundDto);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updatePaymentDto: UpdatePaymentDto,
+  ) {
     return this.paymentsService.update(id, updatePaymentDto);
   }
 

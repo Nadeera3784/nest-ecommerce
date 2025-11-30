@@ -7,5 +7,3 @@ export class UpdatePaymentDto extends PartialType(CreatePaymentDto) {
   @IsString()
   status?: string;
 }
-
-

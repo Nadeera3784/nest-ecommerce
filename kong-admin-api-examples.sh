@@ -42,6 +42,17 @@ curl -i -X POST ${KONG_ADMIN_URL}/services \
   --data read_timeout=60000 \
   --data retries=3
 
+# Order 
+echo "Creating Order Service..."
+curl -i -X POST ${KONG_ADMIN_URL}/services \
+  --data name=order-service \
+  --data url=http://order:3000 \
+  --data protocol=http \
+  --data connect_timeout=60000 \
+  --data write_timeout=60000 \
+  --data read_timeout=60000 \
+  --data retries=3
+
 echo ""
 
 echo "2. CREATE ROUTES"
@@ -83,6 +94,18 @@ curl -i -X POST ${KONG_ADMIN_URL}/services/payment-service/routes \
   --data 'methods[]=DELETE' \
   --data 'methods[]=PATCH'
 
+# Order 
+echo "Creating Order Routes..."
+curl -i -X POST ${KONG_ADMIN_URL}/services/order-service/routes \
+  --data name=order-routes \
+  --data 'paths[]=/api/orders' \
+  --data strip_path=true \
+  --data 'methods[]=GET' \
+  --data 'methods[]=POST' \
+  --data 'methods[]=PUT' \
+  --data 'methods[]=DELETE' \
+  --data 'methods[]=PATCH'
+
 echo ""
 
 
@@ -113,6 +136,14 @@ curl -i -X POST ${KONG_ADMIN_URL}/services/payment-service/plugins \
   --data config.hour=500 \
   --data config.policy=local
 
+# Order 
+echo "Adding rate limiting to Order Service..."
+curl -i -X POST ${KONG_ADMIN_URL}/services/order-service/plugins \
+  --data name=rate-limiting \
+  --data config.minute=100 \
+  --data config.hour=1000 \
+  --data config.policy=local
+
 echo ""
 
 echo "4. CONFIGURE CORS"
@@ -139,6 +170,11 @@ curl -i -X POST ${KONG_ADMIN_URL}/services/inventory-service/plugins \
   --data config.credentials=true
 
 curl -i -X POST ${KONG_ADMIN_URL}/services/payment-service/plugins \
+  --data name=cors \
+  --data 'config.origins=*' \
+  --data config.credentials=true
+
+curl -i -X POST ${KONG_ADMIN_URL}/services/order-service/plugins \
   --data name=cors \
   --data 'config.origins=*' \
   --data config.credentials=true
@@ -173,6 +209,10 @@ curl -i -X POST ${KONG_ADMIN_URL}/services/inventory-service/plugins \
 curl -i -X POST ${KONG_ADMIN_URL}/services/payment-service/plugins \
   --data name=request-transformer \
   --data 'config.add.headers[]=X-Service-Name:payment'
+
+curl -i -X POST ${KONG_ADMIN_URL}/services/order-service/plugins \
+  --data name=request-transformer \
+  --data 'config.add.headers[]=X-Service-Name:order'
 
 echo ""
 
@@ -269,6 +309,10 @@ echo "Testing Payment Service..."
 curl -i http://localhost:8000/api/payment/health
 
 echo ""
+echo "Testing Order Service..."
+curl -i http://localhost:8000/api/orders/health
+
+echo ""
 
 
 echo "12. ADVANCED"
@@ -330,6 +374,7 @@ echo "Test your APIs:"
 echo "  curl http://localhost:8000/api/auth/health"
 echo "  curl http://localhost:8000/api/inventory/health"
 echo "  curl http://localhost:8000/api/payment/health"
+echo "  curl http://localhost:8000/api/orders/health"
 echo ""
 
 

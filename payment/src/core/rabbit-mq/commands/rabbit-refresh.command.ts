@@ -6,7 +6,7 @@ import { RabbitMqConfig } from '../rabbit-mq.config';
 export class RabbitRefreshCommand {
   constructor(
     private readonly config: RabbitMqConfig,
-    private readonly collector: BindingsCollector
+    private readonly collector: BindingsCollector,
   ) {}
 
   async rabbitRefresh(force?: boolean): Promise<void> {
@@ -31,7 +31,7 @@ export class RabbitRefreshCommand {
     }
 
     throw new Error(
-      'BindingsCollector does not expose refresh/clear/rebuild/collect methods in this build.'
+      'BindingsCollector does not expose refresh/clear/rebuild/collect methods in this build.',
     );
   }
 }

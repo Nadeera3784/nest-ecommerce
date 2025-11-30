@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ProductsController } from './controllers/products.controller';
 import { ProductsService } from './services/products.service';
+import { OrderPaidConsumer } from './consumers/order-paid.consumer';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PRODUCT_MODEL, ProductSchema } from './schemas/product.schema';
 
@@ -9,7 +10,7 @@ import { PRODUCT_MODEL, ProductSchema } from './schemas/product.schema';
     MongooseModule.forFeature([{ name: PRODUCT_MODEL, schema: ProductSchema }]),
   ],
   controllers: [ProductsController],
-  providers: [ProductsService],
+  providers: [ProductsService, OrderPaidConsumer],
   exports: [ProductsService],
 })
 export class ProductsModule {}

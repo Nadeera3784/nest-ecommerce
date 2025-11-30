@@ -1,11 +1,7 @@
 import { Schema, Document } from 'mongoose';
+import { Category } from '../interfaces/category.interface';
 
-export interface CategoryDocument extends Document {
-  name: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export interface CategoryDocument extends Category, Document {}
 
 export const CATEGORY_MODEL = 'Category';
 
