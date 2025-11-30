@@ -27,6 +27,13 @@ export class ProductsService {
     return product;
   }
 
+  async findById(id: string): Promise<ProductDocument | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      return null;
+    }
+    return this.productModel.findById(id).exec();
+  }
+
   async create(payload: CreateProductDto): Promise<ProductDocument> {
     const created = await this.productModel.create(payload);
     return created;

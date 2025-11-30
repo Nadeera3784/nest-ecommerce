@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -13,13 +14,19 @@ import {
 import { CreateOrderDto } from "../dtos/create-order.dto";
 import { UpdateOrderStatusDto } from "../dtos/update-order-status.dto";
 import { CartService } from "../../cart/services/cart.service";
+import { OrderProducer } from "../producers/order.producer";
+import { StockValidationService } from "./stock-validation.service";
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     @InjectModel(ORDER_MODEL)
     private readonly orderModel: Model<OrderDocument>,
     private readonly cartService: CartService,
+    private readonly orderProducer: OrderProducer,
+    private readonly stockValidationService: StockValidationService,
   ) {}
 
   private generateOrderNumber(): string {
@@ -37,6 +44,32 @@ export class OrdersService {
     dto: CreateOrderDto,
   ): Promise<OrderDocument> {
     const cart = await this.cartService.getCartForCheckout(userId);
+
+    this.logger.log(`Validating stock for ${cart.items.length} items`);
+
+    const requestId = await this.orderProducer.requestStockValidation(
+      cart.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        name: item.name,
+      })),
+    );
+
+    const stockValidation =
+      await this.stockValidationService.waitForResponse(requestId);
+
+    if (!stockValidation.isValid) {
+      const errorMessages = stockValidation.errors
+        .map((e) => e.message)
+        .join("; ");
+      this.logger.warn(`Stock validation failed: ${errorMessages}`);
+      throw new BadRequestException({
+        message: "Insufficient stock for one or more items",
+        errors: stockValidation.errors,
+      });
+    }
+
+    this.logger.log("Stock validation passed");
 
     const subtotal = cart.totalAmount;
     const shippingCost = dto.shippingCost ?? 0;
@@ -65,6 +98,17 @@ export class OrdersService {
 
     await this.cartService.clearCart(userId);
 
+    await this.orderProducer.publishOrderCreated({
+      orderId: order._id.toString(),
+      orderNumber: order.orderNumber,
+      userId,
+      items: order.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      })),
+      totalAmount: order.totalAmount,
+    });
+
     return order;
   }
 
@@ -81,7 +125,7 @@ export class OrdersService {
       throw new NotFoundException("Order not found");
     }
 
-    const query: any = { _id: id };
+    const query: Record<string, unknown> = { _id: id };
     if (userId) {
       query.userId = userId;
     }
@@ -98,7 +142,7 @@ export class OrdersService {
     orderNumber: string,
     userId?: string,
   ): Promise<OrderDocument> {
-    const query: any = { orderNumber };
+    const query: Record<string, unknown> = { orderNumber };
     if (userId) {
       query.userId = userId;
     }
@@ -119,7 +163,7 @@ export class OrdersService {
       throw new NotFoundException("Order not found");
     }
 
-    const updateData: any = { status: dto.status };
+    const updateData: Record<string, unknown> = { status: dto.status };
     if (dto.trackingNumber) {
       updateData.trackingNumber = dto.trackingNumber;
     }
@@ -146,7 +190,7 @@ export class OrdersService {
     paymentStatus: "pending" | "paid" | "failed" | "refunded",
     paymentId?: string,
   ): Promise<OrderDocument> {
-    const updateData: any = { paymentStatus };
+    const updateData: Record<string, unknown> = { paymentStatus };
     if (paymentId) {
       updateData.paymentId = paymentId;
     }
@@ -183,6 +227,17 @@ export class OrdersService {
     const updated = await this.orderModel
       .findByIdAndUpdate(id, { status: "cancelled" }, { new: true })
       .exec();
+
+    // Publish order cancelled event
+    await this.orderProducer.publishOrderCancelled({
+      orderId: id,
+      orderNumber: order.orderNumber,
+      userId,
+      items: order.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      })),
+    });
 
     return updated!;
   }

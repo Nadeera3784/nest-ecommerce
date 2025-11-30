@@ -1,11 +1,14 @@
 export enum MessageBusChannelsEnum {
   auth = 'async_events_auth_micro',
   inventory = 'async_events_inventory_micro',
+  order = 'async_events_order_micro',
 }
 
 export enum InventoryMessagesEnum {
   OrderPaid = 'inventory.event.order.paid',
   StockUpdated = 'inventory.event.stock.updated',
+  ValidateStock = 'inventory.command.validate-stock',
+  StockValidated = 'order.event.stock-validated',
 }
 
 export enum RabbitMessagesEnum {

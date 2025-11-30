@@ -84,6 +84,14 @@ export const environment: any = {
               durable: true,
             },
           },
+          {
+            name: MessageBusChannelsEnum.order,
+            options: {
+              deadLetterExchange: 'async_events_fallback',
+              deadLetterRoutingKey: MessageBusChannelsEnum.order,
+              durable: true,
+            },
+          },
         ],
       },
     ],
