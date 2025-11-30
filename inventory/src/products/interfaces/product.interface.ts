@@ -4,6 +4,8 @@ export interface Product {
   price: number;
   stock: number;
   categoryId?: string;
+  averageRating: number;
+  totalReviews: number;
   createdAt: Date;
   updatedAt: Date;
 }

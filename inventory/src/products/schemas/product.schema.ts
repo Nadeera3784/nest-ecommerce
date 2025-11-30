@@ -12,6 +12,8 @@ export const ProductSchema = new Schema<ProductDocument>(
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, min: 0 },
     categoryId: { type: String, index: true },
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    totalReviews: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true },
 );

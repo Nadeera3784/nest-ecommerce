@@ -4,6 +4,7 @@ import { HealthController } from './health.controller';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ReviewsModule } from './reviews/reviews.module';
 import { RabbitMqModule } from './core/rabbit-mq';
 import { environment } from './environments/environment';
 
@@ -24,6 +25,7 @@ import { environment } from './environments/environment';
     AuthModule,
     ProductsModule,
     CategoriesModule,
+    ReviewsModule,
   ],
   controllers: [HealthController],
   providers: [],

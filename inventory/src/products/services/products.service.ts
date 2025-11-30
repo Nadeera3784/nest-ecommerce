@@ -72,4 +72,15 @@ export class ProductsService {
     }
     return { deleted: true };
   }
+
+  async updateRating(
+    productId: string,
+    averageRating: number,
+    totalReviews: number,
+  ): Promise<void> {
+    if (!Types.ObjectId.isValid(productId)) return;
+    await this.productModel
+      .findByIdAndUpdate(productId, { averageRating, totalReviews })
+      .exec();
+  }
 }

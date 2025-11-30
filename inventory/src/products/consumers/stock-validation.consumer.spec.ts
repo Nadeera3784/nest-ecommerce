@@ -53,8 +53,16 @@ describe('StockValidationConsumer', () => {
       };
 
       productsService.findById
-        .mockResolvedValueOnce({ _id: 'prod-1', name: 'Product 1', stock: 10 } as any)
-        .mockResolvedValueOnce({ _id: 'prod-2', name: 'Product 2', stock: 5 } as any);
+        .mockResolvedValueOnce({
+          _id: 'prod-1',
+          name: 'Product 1',
+          stock: 10,
+        } as any)
+        .mockResolvedValueOnce({
+          _id: 'prod-2',
+          name: 'Product 2',
+          stock: 5,
+        } as any);
 
       await consumer.handleStockValidation(payload);
 
@@ -105,7 +113,8 @@ describe('StockValidationConsumer', () => {
                 productName: 'Product 1',
                 requested: 15,
                 available: 10,
-                message: 'Insufficient stock for "Product 1". Requested: 15, Available: 10',
+                message:
+                  'Insufficient stock for "Product 1". Requested: 15, Available: 10',
               },
             ],
           },
@@ -117,7 +126,13 @@ describe('StockValidationConsumer', () => {
     it('should return invalid response when product is not found', async () => {
       const payload: StockValidationRequest = {
         requestId: 'test-request-789',
-        items: [{ productId: 'prod-nonexistent', quantity: 1, name: 'Unknown Product' }],
+        items: [
+          {
+            productId: 'prod-nonexistent',
+            quantity: 1,
+            name: 'Unknown Product',
+          },
+        ],
       };
 
       productsService.findById.mockResolvedValueOnce(null);
@@ -160,8 +175,16 @@ describe('StockValidationConsumer', () => {
       };
 
       productsService.findById
-        .mockResolvedValueOnce({ _id: 'prod-1', name: 'Product 1', stock: 10 } as any)
-        .mockResolvedValueOnce({ _id: 'prod-2', name: 'Product 2', stock: 10 } as any)
+        .mockResolvedValueOnce({
+          _id: 'prod-1',
+          name: 'Product 1',
+          stock: 10,
+        } as any)
+        .mockResolvedValueOnce({
+          _id: 'prod-2',
+          name: 'Product 2',
+          stock: 10,
+        } as any)
         .mockResolvedValueOnce(null);
 
       await consumer.handleStockValidation(payload);
@@ -182,7 +205,8 @@ describe('StockValidationConsumer', () => {
                 productName: 'Product 1',
                 requested: 20,
                 available: 10,
-                message: 'Insufficient stock for "Product 1". Requested: 20, Available: 10',
+                message:
+                  'Insufficient stock for "Product 1". Requested: 20, Available: 10',
               },
               {
                 productId: 'prod-missing',
@@ -235,7 +259,9 @@ describe('StockValidationConsumer', () => {
         items: [{ productId: 'prod-1', quantity: 1 }],
       };
 
-      productsService.findById.mockRejectedValueOnce(new Error('Database connection failed'));
+      productsService.findById.mockRejectedValueOnce(
+        new Error('Database connection failed'),
+      );
 
       await consumer.handleStockValidation(payload);
 
@@ -291,4 +317,3 @@ describe('StockValidationConsumer', () => {
     });
   });
 });
-
